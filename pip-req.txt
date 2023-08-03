@@ -1,0 +1,12 @@
+certifi
+chardet
+cryptography
+idna
+selenium>=4.0.0
+undetected-chromedriver
+urllib3>=1.21.1
+ddddocr
+
+# PS: chromedriver_autoinstaller, please use max fork version.
+# python -m pip install git+https://github.com/max32002/python-chromedriver-autoinstaller@master
+chromedriver_autoinstaller
