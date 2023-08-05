@@ -56,9 +56,15 @@ CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
 CONST_MAXBOT_INT28_FILE = "MAXBOT_INT28_IDLE.txt"
 
 CONST_HOMEPAGE_DEFAULT = "https://www.globalinterpark.com/"
+CONST_INTERPARK_SIGN_IN_URL = "https://www.globalinterpark.com/user/signin"
 
 CONST_CHROME_VERSION_NOT_MATCH_EN="Please download the WebDriver version to match your browser version."
 CONST_CHROME_VERSION_NOT_MATCH_TW="請下載與您瀏覽器相同版本的WebDriver版本，或更新您的瀏覽器版本。"
+
+CONST_FROM_TOP_TO_BOTTOM = u"from top to bottom"
+CONST_FROM_BOTTOM_TO_TOP = u"from bottom to top"
+CONST_RANDOM = u"random"
+CONST_SELECT_ORDER_DEFAULT = CONST_FROM_TOP_TO_BOTTOM
 
 CONST_WEBDRIVER_TYPE_SELENIUM = "selenium"
 CONST_WEBDRIVER_TYPE_UC = "undetected_chromedriver"
@@ -559,6 +565,11 @@ def get_driver_by_config(config_dict):
     else:
         try:
             print("goto url:", homepage)
+
+            if 'globalinterpark.com' in homepage:
+                if len(config_dict["advanced"]["interpark_account"])>0:
+                    homepage = CONST_INTERPARK_SIGN_IN_URL
+
             driver.get(homepage)
             time.sleep(3.0)
         except WebDriverException as exce2:
@@ -664,6 +675,73 @@ def get_current_url(driver):
 
     return url, is_quit_bot
 
+def format_keyword_string(keyword):
+    if not keyword is None:
+        if len(keyword) > 0:
+            keyword = keyword.replace('／','/')
+            keyword = keyword.replace('　','')
+            keyword = keyword.replace(',','')
+            keyword = keyword.replace('，','')
+            keyword = keyword.replace('$','')
+            keyword = keyword.replace(' ','').lower()
+    return keyword
+
+def force_press_button_iframe(driver, f, select_by, select_query, force_submit=True):
+    if not f:
+        # ensure we are on main content frame
+        try:
+            driver.switch_to.default_content()
+        except Exception as exc:
+            pass
+    else:
+        try:
+            driver.switch_to.frame(f)
+        except Exception as exc:
+            pass
+
+    is_clicked = force_press_button(driver, select_by, select_query, force_submit)
+
+    if f:
+        # switch back to main content, otherwise we will get StaleElementReferenceException
+        try:
+            driver.switch_to.default_content()
+        except Exception as exc:
+            pass
+
+    return is_clicked
+
+def force_press_button(driver, select_by, select_query, force_submit=True):
+    is_clicked = False
+    next_step_button = None
+    try:
+        next_step_button = driver.find_element(select_by ,select_query)
+        if not next_step_button is None:
+            if next_step_button.is_enabled():
+                next_step_button.click()
+                is_clicked = True
+    except Exception as exc:
+        #print("find %s clickable Exception:" % (select_query))
+        #print(exc)
+        pass
+
+        if force_submit:
+            if not next_step_button is None:
+                is_visible = False
+                try:
+                    if next_step_button.is_enabled():
+                        is_visible = True
+                except Exception as exc:
+                    pass
+
+                if is_visible:
+                    try:
+                        driver.set_script_timeout(1)
+                        driver.execute_script("arguments[0].click();", next_step_button)
+                        is_clicked = True
+                    except Exception as exc:
+                        pass
+    return is_clicked
+
 def facebook_login(driver, account, password):
     ret = False
     el_email = None
@@ -748,7 +826,479 @@ def interpark_change_locale(driver, config_dict):
         print(exc)
         pass
 
+def search_iframe(driver, f, by, value):
+    elem = None
+    if not f:
+        # ensure we are on main content frame
+        try:
+            driver.switch_to.default_content()
+            elem = driver.find_elements(by, value)
+        except Exception as exc:
+            pass
+    else:
+        try:
+            driver.switch_to.frame(f)
+            elem = driver.find_elements(by, value)
+        except Exception as exc:
+            print(exc)
+            pass
+        # switch back to main content, otherwise we will get StaleElementReferenceException
+        try:
+            driver.switch_to.default_content()
+        except Exception as exc:
+            pass
+    return elem
+
+def get_matched_blocks_by_keyword_item_set(config_dict, auto_select_mode, keyword_item_set, formated_area_list):
+    show_debug_message = True    # debug.
+    show_debug_message = False   # online
+
+    if config_dict["advanced"]["verbose"]:
+        show_debug_message = True
+
+    matched_blocks = []
+    for row in formated_area_list:
+        row_text = ""
+        try:
+            row_text = row.text
+        except Exception as exc:
+            pass
+        if row_text is None:
+            row_text = ""
+        if len(row_text) > 0:
+            if reset_row_text_if_match_keyword_exclude(config_dict, row_text):
+                row_text = ""
+        if len(row_text) > 0:
+            if show_debug_message:
+                print("row_text:", row_text)
+
+            is_match_all = False
+            if ' ' in keyword_item_set:
+                keyword_item_array = keyword_item_set.split(' ')
+                is_match_all = True
+                for keyword_item in keyword_item_array:
+                    keyword_item = format_keyword_string(keyword_item)
+                    if not keyword_item in row_text:
+                        is_match_all = False
+            else:
+                exclude_item = format_keyword_string(keyword_item_set)
+                if exclude_item in row_text:
+                    is_match_all = True
+
+            if is_match_all:
+                matched_blocks.append(row)
+
+                # only need first row.
+                if auto_select_mode == CONST_FROM_TOP_TO_BOTTOM:
+                    break
+    return matched_blocks
+
+def get_matched_blocks_by_keyword(config_dict, auto_select_mode, keyword_string, formated_area_list):
+    keyword_array = []
+    try:
+        keyword_array = json.loads("["+ keyword_string +"]")
+    except Exception as exc:
+        keyword_array = []
+
+    matched_blocks = []
+    for keyword_item_set in keyword_array:
+        matched_blocks = get_matched_blocks_by_keyword_item_set(config_dict, auto_select_mode, keyword_item_set, formated_area_list)
+        if len(matched_blocks) > 0:
+            break
+    return matched_blocks
+
+def is_row_match_keyword(keyword_string, row_text):
+    # clean stop word.
+    row_text = format_keyword_string(row_text)
+
+    is_match_keyword = False
+    if len(keyword_string) > 0:
+        area_keyword_exclude_array = []
+        try:
+            area_keyword_exclude_array = json.loads("["+ keyword_string +"]")
+        except Exception as exc:
+            area_keyword_exclude_array = []
+        for exclude_item_list in area_keyword_exclude_array:
+            if len(row_text) > 0:
+                if ' ' in exclude_item_list:
+                    area_keyword_array = exclude_item_list.split(' ')
+                    is_match_all_exclude = True
+                    for exclude_item in area_keyword_array:
+                        exclude_item = format_keyword_string(exclude_item)
+                        if not exclude_item in row_text:
+                            is_match_all_exclude = False
+                    if is_match_all_exclude:
+                        row_text = ""
+                        is_match_keyword = True
+                        break
+                else:
+                    exclude_item = format_keyword_string(exclude_item_list)
+                    if exclude_item in row_text:
+                        row_text = ""
+                        is_match_keyword = True
+                        break
+    return is_match_keyword
+
+def reset_row_text_if_match_keyword_exclude(config_dict, row_text):
+    area_keyword_exclude = config_dict["keyword_exclude"]
+    return is_row_match_keyword(area_keyword_exclude, row_text)
+
+def interpart_date_auto_select(driver, config_dict):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
+
+    if config_dict["advanced"]["verbose"]:
+        show_debug_message = True
+
+    if show_debug_message:
+        print("date_keyword:", config_dict["date_auto_select"]["date_keyword"])
+
+    is_select_exist = False
+
+    my_css_selector = '#play_date'
+    form_select = None
+    select_obj = None
+    try:
+        form_select = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+        if form_select is not None:
+            select_obj = Select(form_select)
+            if not select_obj is None:
+                is_select_exist = True
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+    area_list = None
+    if is_select_exist:
+        try:
+            area_list = select_obj.options
+        except Exception as exc:
+            pass
+
+    is_date_assign_by_bot = False
+    if not area_list is None:
+        if show_debug_message:
+            print("len(area_list):", len(area_list))
+        if len(area_list) > 0:
+            is_select_exist = True
+
+            if len(area_list) == 1:
+                # first time.
+                if show_debug_message:
+                    print('click on date select box, to get date list')
+                
+                # skip this round wait ajax return.
+                area_list = None
+                try:
+                    form_select.click()
+                    time.sleep(0.1)
+                    form_select.click()
+                except Exception as exc:
+                    pass
+            else:
+                # normal case.
+                selected_option = select_obj.first_selected_option
+                option_value = ""
+                try:
+                    option_value = selected_option.get_attribute('value')
+                except Exception as exc:
+                    pass
+                if option_value is None:
+                    option_value = ""
+                if len(option_value) > 0:
+                    print("date is selected.")
+                    area_list = None
+                    is_date_assign_by_bot = True
+
+    #PS: some blocks are generate by ajax, not appear at first time.
+    formated_area_list = None
+    if area_list is not None:
+        area_list_count = len(area_list)
+        if show_debug_message:
+            print("date_list_count:", area_list_count)
+
+        if area_list_count > 0:
+            formated_area_list = []
+
+            # filter list.
+            row_index = 0
+            for row in area_list:
+                row_index += 1
+                # default is enabled.
+                row_is_enabled=True
+
+                if row_is_enabled:
+                    formated_area_list.append(row)
+
+    matched_blocks = []
+    if formated_area_list is not None:
+        area_list_count = len(formated_area_list)
+        if show_debug_message:
+            print("formated_area_list count:", area_list_count)
+        if area_list_count > 0:
+            if len(config_dict["date_auto_select"]["date_keyword"]) == 0:
+                matched_blocks = formated_area_list
+            else:
+                # match keyword.
+                if show_debug_message:
+                    print("start to match keyword:", config_dict["date_auto_select"]["date_keyword"])
+
+                matched_blocks = get_matched_blocks_by_keyword(config_dict, config_dict["date_auto_select"]["mode"], config_dict["date_auto_select"]["date_keyword"], formated_area_list)                
+
+                if show_debug_message:
+                    if not matched_blocks is None:
+                        print("after match keyword, found count:", len(matched_blocks))
+        else:
+            print("not found date-time-position")
+            pass
+
+    target_area = None
+    if matched_blocks is not None:
+        if len(matched_blocks) > 0:
+            target_row_index = 0
+
+            if config_dict["date_auto_select"]["mode"] == CONST_FROM_TOP_TO_BOTTOM:
+                pass
+
+            if config_dict["date_auto_select"]["mode"] == CONST_FROM_BOTTOM_TO_TOP:
+                target_row_index = len(matched_blocks)-1
+
+            if config_dict["date_auto_select"]["mode"] == CONST_RANDOM:
+                target_row_index = random.randint(0,len(matched_blocks)-1)
+
+            target_area = matched_blocks[target_row_index]
+
+    if target_area is not None:
+        try:
+            if target_area.is_enabled():
+                option_value = ""
+                try:
+                    option_value = target_area.get_attribute('value')
+                except Exception as exc:
+                    print("find option value fail")
+                    pass
+                
+                if option_value is None:
+                    option_value = ""
+
+                if len(option_value) > 0:
+                    # selenium
+                    select_obj.select_by_value(option_value);
+                    is_date_assign_by_bot = True
+        except Exception as exc:
+            if show_debug_message:
+                print(exc)
+            pass
+
+
+    return is_date_assign_by_bot, is_select_exist
+
+def interpart_time_auto_select(driver, config_dict):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
+
+    if config_dict["advanced"]["verbose"]:
+        show_debug_message = True
+
+    if show_debug_message:
+        print("time_keyword:", config_dict["time_auto_select"]["time_keyword"])
+
+    is_select_exist = False
+
+    my_css_selector = '#play_time'
+    form_select = None
+    select_obj = None
+    try:
+        form_select = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+        if form_select is not None:
+            select_obj = Select(form_select)
+            if not select_obj is None:
+                is_select_exist = True
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+    area_list = None
+    if is_select_exist:
+        try:
+            area_list = select_obj.options
+        except Exception as exc:
+            pass
+
+    is_time_assign_by_bot = False
+    if not area_list is None:
+        if show_debug_message:
+            print("len(area_list):", len(area_list))
+        if len(area_list) > 0:
+            is_select_exist = True
+
+            if len(area_list) == 1:
+                # skip this round wait ajax return.
+                area_list = None
+            else:
+                # normal case.
+                selected_option = select_obj.first_selected_option
+                option_value = ""
+                try:
+                    option_value = selected_option.get_attribute('value')
+                except Exception as exc:
+                    pass
+                if option_value is None:
+                    option_value = ""
+                if len(option_value) > 0:
+                    print("time is selected.")
+                    area_list = None
+                    is_time_assign_by_bot = True
+
+    #PS: some blocks are generate by ajax, not appear at first time.
+    formated_area_list = None
+    if area_list is not None:
+        area_list_count = len(area_list)
+        if show_debug_message:
+            print("date_list_count:", area_list_count)
+
+        if area_list_count > 0:
+            formated_area_list = []
+
+            # filter list.
+            row_index = 0
+            for row in area_list:
+                row_index += 1
+                # default is enabled.
+                row_is_enabled=True
+
+                if row_is_enabled:
+                    formated_area_list.append(row)
+
+    matched_blocks = []
+    if formated_area_list is not None:
+        area_list_count = len(formated_area_list)
+        if show_debug_message:
+            print("formated_area_list count:", area_list_count)
+        if area_list_count > 0:
+            if len(config_dict["time_auto_select"]["time_keyword"]) == 0:
+                matched_blocks = formated_area_list
+            else:
+                # match keyword.
+                if show_debug_message:
+                    print("start to match keyword:", config_dict["time_auto_select"]["time_keyword"])
+
+                matched_blocks = get_matched_blocks_by_keyword(config_dict, config_dict["time_auto_select"]["mode"], config_dict["date_auto_select"]["time_keyword"], formated_area_list)                
+
+                if show_debug_message:
+                    if not matched_blocks is None:
+                        print("after match keyword, found count:", len(matched_blocks))
+        else:
+            print("not found date-time-position")
+            pass
+
+    target_area = None
+    if matched_blocks is not None:
+        if len(matched_blocks) > 0:
+            target_row_index = 0
+
+            if config_dict["time_auto_select"]["mode"] == CONST_FROM_TOP_TO_BOTTOM:
+                pass
+
+            if config_dict["time_auto_select"]["mode"] == CONST_FROM_BOTTOM_TO_TOP:
+                target_row_index = len(matched_blocks)-1
+
+            if config_dict["time_auto_select"]["mode"] == CONST_RANDOM:
+                target_row_index = random.randint(0,len(matched_blocks)-1)
+
+            target_area = matched_blocks[target_row_index]
+
+    if target_area is not None:
+        try:
+            if target_area.is_enabled():
+                option_value = ""
+                try:
+                    option_value = target_area.get_attribute('value')
+                except Exception as exc:
+                    print("find option value fail")
+                    pass
+                
+                if option_value is None:
+                    option_value = ""
+
+                if len(option_value) > 0:
+                    # selenium
+                    select_obj.select_by_value(option_value);
+                    is_time_assign_by_bot = True
+        except Exception as exc:
+            if show_debug_message:
+                print(exc)
+            pass
+
+
+    return is_time_assign_by_bot, is_select_exist
+
+def interpark_login(driver, account, password):
+    ret = False
+    el_email = None
+    try:
+        el_email = driver.find_element(By.CSS_SELECTOR, '#memEmail')
+    except Exception as exc:
+        #print("find #email fail")
+        #print(exc)
+        pass
+
+    is_visible = False
+    if el_email is not None:
+        try:
+            if el_email.is_enabled():
+                is_visible = True
+        except Exception as exc:
+            pass
+
+    is_email_sent = False
+    if is_visible:
+        try:
+            inputed_text = el_email.get_attribute('value')
+            if inputed_text is not None:
+                if len(inputed_text) == 0:
+                    el_email.send_keys(account)
+                    is_email_sent = True
+                else:
+                    if inputed_text == account:
+                        is_email_sent = True
+        except Exception as exc:
+            pass
+
+    el_pass = None
+    if is_email_sent:
+        try:
+            el_pass = driver.find_element(By.CSS_SELECTOR, '#memPass')
+        except Exception as exc:
+            pass
+
+    is_password_sent = False
+    if el_pass is not None:
+        try:
+            if el_pass.is_enabled():
+                inputed_text = el_pass.get_attribute('value')
+                if inputed_text is not None:
+                    if len(inputed_text) == 0:
+                        el_pass.click()
+                        if(len(password)>0):
+                            el_pass.send_keys(password)
+                            el_pass.send_keys(Keys.ENTER)
+                            is_password_sent = True
+        except Exception as exc:
+            pass
+
+    return ret
+
+
 def interpark_main(driver, config_dict, url):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
+
+    if config_dict["advanced"]["verbose"]:
+        show_debug_message = True
+
     try:
         window_handles_count = len(driver.window_handles)
         if window_handles_count > 1:
@@ -759,9 +1309,64 @@ def interpark_main(driver, config_dict, url):
     except Exception as excSwithFail:
         pass
 
+    if "globalinterpark.com/user/signin" in url:
+        interpark_account = config_dict["advanced"]["interpark_account"]
+        if len(interpark_account) > 2:
+            interpark_login(driver, interpark_account, decryptMe(config_dict["advanced"]["interpark_password"]))
+
 
     if "globalinterpark.com/main/main" in url:
         interpark_change_locale(driver, config_dict)
+
+    if "globalinterpark.com/detail/edetail?prdNo=" in url:
+        if config_dict["date_auto_select"]["enable"]:
+            # get iframes
+            frames = driver.find_elements(By.CSS_SELECTOR, 'iframe')
+            
+            is_need_refresh = True
+
+            frame_index = 0
+            for f in frames:
+                frame_index += 1
+                if show_debug_message:
+                    print("search at frame index:", frame_index)
+
+                try:
+                    driver.switch_to.frame(f)
+                except Exception as exc:
+                    pass
+
+                is_date_assign_by_bot, is_select_exist = interpart_date_auto_select(driver, config_dict)
+                if is_select_exist:
+                    is_need_refresh = False
+                if show_debug_message:
+                    print("is_date_assign_by_bot:", is_date_assign_by_bot)
+
+                is_time_assign_by_bot = False
+                if is_date_assign_by_bot:
+                    if config_dict["time_auto_select"]["enable"]:
+                        is_time_assign_by_bot, is_select_exist = interpart_time_auto_select(driver, config_dict)
+
+                if is_time_assign_by_bot:
+                    js="javascript:fnNormalBooking();"
+                    try:
+                        driver.set_script_timeout(1)
+                        driver.execute_script(js)
+                    except Exception as exc:
+                        pass
+
+                try:
+                    driver.switch_to.default_content()
+                except Exception as exc:
+                    pass
+
+            if is_need_refresh:
+                try:
+                    driver.refresh()
+                    time.sleep(0.3)
+                except Exception as exc:
+                    pass
+
 
 def main(args):
     config_dict = get_config_dict(args)

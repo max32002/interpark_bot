@@ -29,6 +29,12 @@ CONST_MAXBOT_CONFIG_FILE = "settings.json"
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
 CONST_MAXBOT_INT28_FILE = "MAXBOT_INT28_IDLE.txt"
 
+CONST_FROM_TOP_TO_BOTTOM = u"from top to bottom"
+CONST_FROM_BOTTOM_TO_TOP = u"from bottom to top"
+CONST_RANDOM = u"random"
+CONST_SELECT_ORDER_DEFAULT = CONST_FROM_TOP_TO_BOTTOM
+CONST_SELECT_OPTIONS_DEFAULT = (CONST_FROM_TOP_TO_BOTTOM, CONST_FROM_BOTTOM_TO_TOP, CONST_RANDOM)
+
 CONST_HOMEPAGE_DEFAULT = "https://www.globalinterpark.com/"
 
 URL_DONATE = 'https://max-everyday.com/about/#donate'
@@ -49,15 +55,20 @@ def load_translate():
     en_us={}
     en_us["homepage"] = 'Homepage'
     en_us["browser"] = 'Browser'
-    en_us["language"] = 'Language'
-    en_us["locale"] = 'Locale'
+    en_us["language"] = 'MaxBot Language'
+    en_us["locale"] = 'Interpark Locale'
     en_us["enable"] = 'Enable'
 
+    en_us["date_auto_select"] = 'Date Auto Select'
     en_us["date_select_order"] = 'Date select order'
     en_us["date_keyword"] = 'Date Keyword'
+    en_us["keyword_usage"] = 'Each keyword need double quotes, separated by comma,\nUse space in keyword as AND logic.\nAppend ,\"\" to match all.'
 
+    en_us["time_auto_select"] = 'Time Auto Select'
     en_us["time_select_order"] = 'Time select order'
     en_us["time_keyword"] = 'Time Keyword'
+
+    en_us["keyword_exclude"] = 'Keyword Exclude'
 
     en_us["user_info"] = "Payer Info"
     en_us["user_name"] = "* Name"
@@ -72,6 +83,9 @@ def load_translate():
 
     en_us["card_number"] = "Number"
     en_us["card_exp"] = "Expiration (MM/YY)"
+
+    en_us["ocr_captcha"] = 'OCR captcha'
+    en_us["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
 
     en_us["verbose"] = 'Verbose mode'
     en_us["running_status"] = 'Running Status'
@@ -97,6 +111,8 @@ def load_translate():
     en_us["restore_defaults"] = 'Restore Defaults'
     en_us["done"] = 'Done'
 
+    en_us["interpark_account"] = 'interpark account'
+    en_us["interpark_password"] = 'interpark password'
     en_us["facebook_account"] = 'Facebook account'
     en_us["facebook_password"] = 'Facebook password'
     en_us["save_password_alert"] = 'Saving passwords to config file may expose your passwords.'
@@ -109,15 +125,20 @@ def load_translate():
     zh_tw={}
     zh_tw["homepage"] = '售票網站'
     zh_tw["browser"] = '瀏覽器'
-    zh_tw["language"] = '語言'
-    zh_tw["locale"] = '語言環境'
+    zh_tw["language"] = 'MaxBot 語言'
+    zh_tw["locale"] = 'Interpark 語言環境'
     zh_tw["enable"] = '啟用'
 
+    zh_tw["date_auto_select"] = '日期自動點選'
     zh_tw["date_select_order"] = '日期排序方式'
     zh_tw["date_keyword"] = '日期關鍵字'
 
+    zh_tw["time_auto_select"] = '時間自動點選'
     zh_tw["time_select_order"] = '時間排序方式'
     zh_tw["time_keyword"] = '時間關鍵字'
+
+    zh_tw["keyword_exclude"] = '排除關鍵字'
+    zh_tw["keyword_usage"] = '每組關鍵字需要雙引號, 用逗號分隔, \n在關鍵字中使用空格作為 AND 邏輯。\n加入 ,\"\" 代表符合所有關鍵字'
 
     zh_tw["user_info"] = "聯絡資訊"
     zh_tw["user_name"] = "* 名字"
@@ -132,6 +153,9 @@ def load_translate():
 
     zh_tw["card_number"] = "卡號"
     zh_tw["card_exp"] = "到期日 (MM/YY)"
+
+    zh_tw["ocr_captcha"] = '猜測驗證碼'
+    zh_tw["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
 
     zh_tw["verbose"] = '輸出詳細除錯訊息'
     zh_tw["running_status"] = '執行狀態'
@@ -157,6 +181,8 @@ def load_translate():
     zh_tw["restore_defaults"] = '恢復預設值'
     zh_tw["done"] = '完成'
 
+    zh_tw["interpark_account"] = 'interpark 帳號'
+    zh_tw["interpark_password"] = 'interpark 密碼'
     zh_tw["facebook_account"] = 'Facebook 帳號'
     zh_tw["facebook_password"] = 'Facebook 密碼'
     zh_tw["save_password_alert"] = '將密碼保存到設定檔中可能會讓您的密碼被盜。'
@@ -170,15 +196,20 @@ def load_translate():
     zh_cn={}
     zh_cn["homepage"] = '售票网站'
     zh_cn["browser"] = '浏览器'
-    zh_cn["language"] = '语言'
-    zh_cn["locale"] = '语言环境'
+    zh_cn["language"] = 'MaxBot 语言'
+    zh_cn["locale"] = 'Interpark 语言环境'
     zh_cn["enable"] = '启用'
 
+    zh_cn["date_auto_select"] = '日期自动点选'
     zh_cn["date_select_order"] = '日期排序方式'
     zh_cn["date_keyword"] = '日期关键字'
 
+    zh_cn["time_auto_select"] = '时间自动点选'
     zh_cn["time_select_order"] = '时间排序方式'
     zh_cn["time_keyword"] = '时间关键字'
+
+    zh_cn["keyword_exclude"] = '排除关键字'
+    zh_cn["keyword_usage"] = '每组关键字需要双引号, 用逗号分隔, \n在关键字中使用空格作为 AND 逻辑。\n附加 ,\"\" 以匹配所有结果。'
 
     zh_cn["user_info"] = "联络资讯"
     zh_cn["user_name"] = "* 名字"
@@ -194,6 +225,9 @@ def load_translate():
     zh_cn["card_number"] = "卡号"
     zh_cn["card_exp"] = "到期日 (MM/YY)"
 
+    zh_cn["ocr_captcha"] = '猜测验证码'
+    zh_cn["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
+
     zh_cn["verbose"] = '输出详细除错讯息'
     zh_cn["running_status"] = '执行状态'
     zh_cn["running_url"] = '执行网址'
@@ -206,7 +240,7 @@ def load_translate():
     zh_cn["resume"] = '接续抢票'
 
     zh_cn["preference"] = '偏好设定'
-    zh_cn["advanced"] = '進階設定'
+    zh_cn["advanced"] = '进阶设定'
     zh_cn["autofill"] = '自动填表单'
     zh_cn["runtime"] = '运行'
     zh_cn["about"] = '关于'
@@ -218,9 +252,11 @@ def load_translate():
     zh_cn["restore_defaults"] = '恢复默认值'
     zh_cn["done"] = '完成'
 
-    zh_cn["facebook_account"] = 'Facebook 帳號'
-    zh_cn["facebook_password"] = 'Facebook 密碼'
-    zh_cn["save_password_alert"] = '將密碼保存到文件中可能會暴露您的密碼。'
+    zh_cn["interpark_account"] = 'interpark 帐号'
+    zh_cn["interpark_password"] = 'interpark 密码'
+    zh_cn["facebook_account"] = 'Facebook 帐号'
+    zh_cn["facebook_password"] = 'Facebook 密码'
+    zh_cn["save_password_alert"] = '将密码保存到文件中可能会暴露您的密码。'
 
     zh_cn["maxbot_slogan"] = 'Max Interpark Bot 是一个免费的开源机器人程序。\n祝您预订成功。'
     zh_cn["donate"] = '打赏'
@@ -230,15 +266,20 @@ def load_translate():
     ja_jp={}
     ja_jp["homepage"] = 'ホームページ'
     ja_jp["browser"] = 'ブラウザ'
-    ja_jp["language"] = '言語'
-    ja_jp["locale"] = 'ロケール'
+    ja_jp["language"] = 'MaxBot 言語'
+    ja_jp["locale"] = 'Interpark ロケール'
     ja_jp["enable"] = '有効'
 
+    ja_jp["date_auto_select"] = '日付自動選択'
     ja_jp["date_select_order"] = '日付のソート方法'
     ja_jp["date_keyword"] = '日付キーワード'
 
+    ja_jp["time_auto_select"] = '时间自動選択'
     ja_jp["time_select_order"] = '時間のソート方法'
     ja_jp["time_keyword"] = '時間キーワード'
+
+    ja_jp["keyword_exclude"] = '除外キーワード'
+    ja_jp["keyword_usage"] = '各キーワードはカンマで区切られた二重引用符が必要です。\nキーワード内のスペースを AND ロジックとして使用します。\nすべてに一致するように ,\"\" を追加します。'
 
     ja_jp["user_info"] = "聯絡資訊"
     ja_jp["user_name"] = "* お名前"
@@ -253,6 +294,9 @@ def load_translate():
 
     ja_jp["card_number"] = "卡號"
     ja_jp["card_exp"] = "到期日 (MM/YY)"
+
+    ja_jp["ocr_captcha"] = 'キャプチャを推測する'
+    ja_jp["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
 
     ja_jp["verbose"] = '詳細モード'
     ja_jp["running_status"] = 'スターテス'
@@ -278,6 +322,8 @@ def load_translate():
     ja_jp["restore_defaults"] = 'デフォルトに戻す'
     ja_jp["done"] = '終わり'
 
+    ja_jp["interpark_account"] = 'interparkのアカウント'
+    ja_jp["interpark_password"] = 'interparkのパスワード'
     ja_jp["facebook_account"] = 'Facebookのアカウント'
     ja_jp["facebook_password"] = 'Facebookのパスワード'
     ja_jp["save_password_alert"] = 'パスワードをファイルに保存すると、パスワードが公開される可能性があります。'
@@ -292,6 +338,26 @@ def load_translate():
     translate['zh_cn']=zh_cn
     translate['ja_jp']=ja_jp
     return translate
+
+def format_config_keyword_for_json(user_input):
+    if len(user_input) > 0:
+        if not ('\"' in user_input):
+            user_input = '"' + user_input + '"'
+
+        if user_input[:1]=="{" and user_input[-1:]=="}":
+            tmp_json = {}
+            try:
+                tmp_json = json.loads(user_input)
+                key=list(tmp_json.keys())[0]
+                first_item=tmp_json[key]
+                user_input=json.dumps(first_item)
+            except Exception as exc:
+                pass
+
+        if user_input[:1]=="[" and user_input[-1:]=="]":
+            user_input=user_input[1:]
+            user_input=user_input[:-1]
+    return user_input
 
 def sx(s1):
     key=18
@@ -339,6 +405,18 @@ def get_default_config():
     config_dict["ocr_captcha"]["image_source"] = CONST_OCR_CAPTCH_IMAGE_SOURCE_CANVAS
     config_dict["webdriver_type"] = CONST_WEBDRIVER_TYPE_UC
 
+    config_dict["date_auto_select"] = {}
+    config_dict["date_auto_select"]["enable"] = True
+    config_dict["date_auto_select"]["date_keyword"] = ""
+    config_dict["date_auto_select"]["mode"] = CONST_SELECT_ORDER_DEFAULT
+
+    config_dict["time_auto_select"] = {}
+    config_dict["time_auto_select"]["enable"] = True
+    config_dict["time_auto_select"]["time_keyword"] = ""
+    config_dict["time_auto_select"]["mode"] = CONST_SELECT_ORDER_DEFAULT
+
+    config_dict["keyword_exclude"] = "\"Restricted View\""
+
     if is_arm():
         config_dict["ocr_captcha"]["enable"] = False
         config_dict["ocr_captcha"]["force_submit"] = False
@@ -365,6 +443,9 @@ def get_default_config():
 
     config_dict["advanced"]["facebook_account"] = ""
     config_dict["advanced"]["facebook_password"] = ""
+
+    config_dict["advanced"]["interpark_account"] = ""
+    config_dict["advanced"]["interpark_password"] = ""
 
     config_dict["advanced"]["adblock_plus_enable"] = False
     config_dict["advanced"]["headless"] = False
@@ -399,7 +480,6 @@ def btn_restore_defaults_clicked(language_code):
     config_filepath = os.path.join(app_root, CONST_MAXBOT_CONFIG_FILE)
 
     config_dict = get_default_config()
-    import json
     with open(config_filepath, 'w') as outfile:
         json.dump(config_dict, outfile)
     messagebox.showinfo(translate[language_code]["restore_defaults"], translate[language_code]["done"])
@@ -464,10 +544,22 @@ def btn_save_act(language_code, slience_mode=False):
     global combo_card_exp_month
     global combo_card_exp_year
 
+    global chk_state_ocr_captcha
+    global chk_state_ocr_captcha_ddddocr_beta
+
     global chk_state_verbose
 
     global txt_facebook_account
     global txt_facebook_password
+
+    global txt_interpark_account
+    global txt_interpark_password
+
+    global chk_state_date_auto_select
+    global txt_date_keyword
+    global chk_state_time_auto_select
+    global txt_time_keyword
+    global txt_keyword_exclude
 
 
     is_all_data_correct = True
@@ -536,12 +628,70 @@ def btn_save_act(language_code, slience_mode=False):
         config_dict["advanced"]["facebook_password"] = txt_facebook_password.get().strip()
         config_dict["advanced"]["facebook_password"] = encryptMe(config_dict["advanced"]["facebook_password"])
 
+        config_dict["advanced"]["interpark_account"] = txt_interpark_account.get().strip()
+        config_dict["advanced"]["interpark_password"] = txt_interpark_password.get().strip()
+        config_dict["advanced"]["interpark_password"] = encryptMe(config_dict["advanced"]["interpark_password"])
+
+        config_dict["ocr_captcha"] = {}
+        config_dict["ocr_captcha"]["enable"] = bool(chk_state_ocr_captcha.get())
+        config_dict["ocr_captcha"]["beta"] = bool(chk_state_ocr_captcha_ddddocr_beta.get())
+
+        if is_arm():
+            config_dict["ocr_captcha"]["enable"] = False
+            config_dict["ocr_captcha"]["force_submit"] = False
 
         config_dict["advanced"]["verbose"] = bool(chk_state_verbose.get())
 
+
+        config_dict["date_auto_select"]["enable"] = bool(chk_state_date_auto_select.get())
+        config_dict["date_auto_select"]["mode"] = combo_date_auto_select_mode.get().strip()
+
+        date_keyword = txt_date_keyword.get("1.0",END).strip()
+        date_keyword = format_config_keyword_for_json(date_keyword)
+        config_dict["date_auto_select"]["date_keyword"]=date_keyword
+
+        config_dict["time_auto_select"]["enable"] = bool(chk_state_time_auto_select.get())
+        config_dict["time_auto_select"]["mode"] = combo_time_auto_select_mode.get().strip()
+
+        time_keyword = txt_time_keyword.get("1.0",END).strip()
+        time_keyword = format_config_keyword_for_json(time_keyword)
+        config_dict["time_auto_select"]["time_keyword"]=time_keyword
+
+        keyword_exclude = txt_keyword_exclude.get("1.0",END).strip()
+        keyword_exclude = format_config_keyword_for_json(keyword_exclude)
+        config_dict["keyword_exclude"]=keyword_exclude
+
+        # test keyword format.
+        if is_all_data_correct:
+            if len(date_keyword) > 0:
+                try:
+                    test_array = json.loads("["+ date_keyword +"]")
+                except Exception as exc:
+                    print(exc)
+                    messagebox.showinfo(translate[language_code]["save"], "Error:" + translate[language_code]["date_keyword"])
+                    is_all_data_correct = False
+
+        if is_all_data_correct:
+            if len(time_keyword) > 0:
+                try:
+                    test_array = json.loads("["+ time_keyword +"]")
+                except Exception as exc:
+                    print(exc)
+                    messagebox.showinfo(translate[language_code]["save"], "Error:" + translate[language_code]["time_keyword"])
+                    is_all_data_correct = False
+
+        if is_all_data_correct:
+            if len(keyword_exclude) > 0:
+                try:
+                    test_array = json.loads("["+ keyword_exclude +"]")
+                except Exception as exc:
+                    print(exc)
+                    messagebox.showinfo(translate[language_code]["save"], "Error:" + translate[language_code]["keyword_exclude"])
+                    is_all_data_correct = False
+
+
     # save config.
     if is_all_data_correct:
-        import json
         with open(config_filepath, 'w') as outfile:
             json.dump(config_dict, outfile)
 
@@ -661,6 +811,12 @@ def applyNewLanguage():
     global lbl_donate
     global lbl_release
 
+    global lbl_ocr_captcha
+    global lbl_ocr_captcha_ddddocr_beta
+
+    global chk_ocr_captcha
+    global chk_ocr_captcha_ddddocr_beta
+
     global lbl_verbose
     global chk_verbose
 
@@ -689,8 +845,8 @@ def applyNewLanguage():
     chk_foreign_card.config(text=translate[language_code]["enable"])
 
     tabControl.tab(0, text=translate[language_code]["preference"])
-    tabControl.tab(1, text=translate[language_code]["advanced"])
-    tabControl.tab(2, text=translate[language_code]["autofill"])
+    tabControl.tab(1, text=translate[language_code]["autofill"])
+    tabControl.tab(2, text=translate[language_code]["advanced"])
     tabControl.tab(3, text=translate[language_code]["runtime"])
     tabControl.tab(4, text=translate[language_code]["about"])
 
@@ -699,11 +855,50 @@ def applyNewLanguage():
     lbl_donate.config(text=translate[language_code]["donate"])
     lbl_release.config(text=translate[language_code]["release"])
 
+    lbl_ocr_captcha.config(text=translate[language_code]["ocr_captcha"])
+    lbl_ocr_captcha_ddddocr_beta.config(text=translate[language_code]["ocr_captcha_ddddocr_beta"])
+
+    chk_ocr_captcha.config(text=translate[language_code]["enable"])
+    chk_ocr_captcha_ddddocr_beta.config(text=translate[language_code]["enable"])
+
     lbl_verbose.config(text=translate[language_code]["verbose"])
     chk_verbose.config(text=translate[language_code]["enable"])
 
     lbl_maxbot_status.config(text=translate[language_code]["running_status"])
     lbl_maxbot_last_url.config(text=translate[language_code]["running_url"])
+
+    global lbl_date_auto_select
+    global lbl_date_auto_select_mode
+    global lbl_date_keyword
+
+    global lbl_time_auto_select
+    global lbl_time_auto_select_mode
+    global lbl_time_keyword
+
+    global lbl_keyword_exclude
+    global lbl_keyword_usage
+
+    lbl_date_auto_select.config(text=translate[language_code]["date_auto_select"])
+    lbl_date_auto_select_mode.config(text=translate[language_code]["date_select_order"])
+    lbl_date_keyword.config(text=translate[language_code]["date_keyword"])
+    lbl_time_auto_select.config(text=translate[language_code]["time_auto_select"])
+    lbl_time_auto_select_mode.config(text=translate[language_code]["time_select_order"])
+    lbl_time_keyword.config(text=translate[language_code]["time_keyword"])
+    lbl_keyword_exclude.config(text=translate[language_code]["keyword_exclude"])
+    lbl_keyword_usage.config(text=translate[language_code]["keyword_usage"])
+
+    global lbl_facebook_account
+    global lbl_facebook_password
+    global lbl_interpark_account
+    global lbl_interpark_password
+    global lbl_save_password_alert
+
+    lbl_facebook_account.config(text=translate[language_code]["facebook_account"])
+    lbl_facebook_password.config(text=translate[language_code]["facebook_password"])
+    lbl_interpark_account.config(text=translate[language_code]["interpark_account"])
+    lbl_interpark_password.config(text=translate[language_code]["interpark_password"])
+    lbl_save_password_alert.config(text=translate[language_code]["save_password_alert"])
+
 
     global btn_run
     global btn_save
@@ -736,15 +931,11 @@ def showHideBlocks(all_layout_visible=False):
     pass
 
 def PreferenctTab(root, config_dict, language_code, UI_PADDING_X):
-    homepage = None
-    language = "English"
-
     homepage_list = (CONST_HOMEPAGE_DEFAULT)
 
     # output config:
     print("config:", config_dict)
 
-    # output to GUI.
     row_count = 0
 
     frame_group_header = Frame(root)
@@ -788,16 +979,172 @@ def PreferenctTab(root, config_dict, language_code, UI_PADDING_X):
 
     group_row_count+=1
 
+    global lbl_date_auto_select
+    lbl_date_auto_select = Label(frame_group_header, text=translate[language_code]['date_auto_select'])
+    lbl_date_auto_select.grid(column=0, row=group_row_count, sticky = E)
+
+    global chk_state_date_auto_select
+    chk_state_date_auto_select = BooleanVar()
+    chk_state_date_auto_select.set(config_dict["date_auto_select"]["enable"])
+
+    global chk_date_auto_select
+    chk_date_auto_select = Checkbutton(frame_group_header, text=translate[language_code]['enable'], variable=chk_state_date_auto_select)
+    chk_date_auto_select.grid(column=1, row=group_row_count, sticky = W)
+
+    group_row_count+=1
+
+    global date_auto_select_mode_index
+    date_auto_select_mode_index = group_row_count
+
+    global lbl_date_auto_select_mode
+    lbl_date_auto_select_mode = Label(frame_group_header, text=translate[language_code]['date_select_order'])
+    lbl_date_auto_select_mode.grid(column=0, row=date_auto_select_mode_index, sticky = E)
+
+    global combo_date_auto_select_mode
+    combo_date_auto_select_mode = ttk.Combobox(frame_group_header, state="readonly", width=30)
+    combo_date_auto_select_mode['values']= CONST_SELECT_OPTIONS_DEFAULT
+    combo_date_auto_select_mode.set(config_dict["date_auto_select"]["mode"])
+    combo_date_auto_select_mode.grid(column=1, row=date_auto_select_mode_index, sticky = W)
+
+    group_row_count+=1
+
+    global date_keyword_index
+    date_keyword_index = group_row_count
+
+    global lbl_date_keyword
+    lbl_date_keyword = Label(frame_group_header, text=translate[language_code]['date_keyword'])
+    lbl_date_keyword.grid(column=0, row=date_keyword_index, sticky = E+N)
+
+    global txt_date_keyword
+    txt_date_keyword = Text(frame_group_header, width=30, height=4)
+    txt_date_keyword.grid(column=1, row=group_row_count, sticky = W)
+    txt_date_keyword.insert("1.0", config_dict["date_auto_select"]["date_keyword"].strip())
+
+    group_row_count+=1
+
+    global lbl_time_auto_select
+    lbl_time_auto_select = Label(frame_group_header, text=translate[language_code]['time_auto_select'])
+    lbl_time_auto_select.grid(column=0, row=group_row_count, sticky = E)
+
+    global chk_state_time_auto_select
+    chk_state_time_auto_select = BooleanVar()
+    chk_state_time_auto_select.set(config_dict["time_auto_select"]["enable"])
+
+    global chk_time_auto_select
+    chk_time_auto_select = Checkbutton(frame_group_header, text=translate[language_code]['enable'], variable=chk_state_time_auto_select)
+    chk_time_auto_select.grid(column=1, row=group_row_count, sticky = W)
+
+    group_row_count+=1
+
+    global time_auto_select_mode_index
+    time_auto_select_mode_index = group_row_count
+
+    global lbl_time_auto_select_mode
+    lbl_time_auto_select_mode = Label(frame_group_header, text=translate[language_code]['time_select_order'])
+    lbl_time_auto_select_mode.grid(column=0, row=time_auto_select_mode_index, sticky = E)
+
+    global combo_time_auto_select_mode
+    combo_time_auto_select_mode = ttk.Combobox(frame_group_header, state="readonly", width=30)
+    combo_time_auto_select_mode['values']= CONST_SELECT_OPTIONS_DEFAULT
+    combo_time_auto_select_mode.set(config_dict["time_auto_select"]["mode"])
+    combo_time_auto_select_mode.grid(column=1, row=time_auto_select_mode_index, sticky = W)
+
+    group_row_count+=1
+
+    global time_keyword_index
+    time_keyword_index = group_row_count
+
+    global lbl_time_keyword
+    lbl_time_keyword = Label(frame_group_header, text=translate[language_code]['time_keyword'])
+    lbl_time_keyword.grid(column=0, row=time_keyword_index, sticky = E+N)
+
+    global txt_time_keyword
+    txt_time_keyword = Text(frame_group_header, width=30, height=4)
+    txt_time_keyword.grid(column=1, row=group_row_count, sticky = W)
+    txt_time_keyword.insert("1.0", config_dict["time_auto_select"]["time_keyword"].strip())
+
+    group_row_count+=1
+
+    global lbl_keyword_exclude
+    lbl_keyword_exclude = Label(frame_group_header, text=translate[language_code]['keyword_exclude'])
+    lbl_keyword_exclude.grid(column=0, row=group_row_count, sticky = E+N)
+
+    global txt_keyword_exclude
+    txt_keyword_exclude = Text(frame_group_header, width=30, height=4)
+    txt_keyword_exclude.grid(column=1, row=group_row_count, sticky = W)
+    txt_keyword_exclude.insert("1.0", config_dict["keyword_exclude"].strip())
+
+    group_row_count+=1
+
+    global lbl_keyword_usage
+    lbl_keyword_usage = Label(frame_group_header, text=translate[language_code]['keyword_usage'])
+    lbl_keyword_usage.grid(column=1, row=group_row_count, sticky = W)
+
     # add first block to UI.
     frame_group_header.grid(column=0, row=row_count, sticky = W, padx=UI_PADDING_X)
+    
     row_count+=1
 
-    '''
-    lbl_hr = Label(root, text="")
-    lbl_hr.grid(column=0, row=row_count)
 
-    row_count+=1
-    '''
+
+def AutofillTab(root, config_dict, language_code, UI_PADDING_X):
+    row_count = 0
+
+    frame_group_header = Frame(root)
+    group_row_count = 0
+
+    global lbl_interpark_account
+    lbl_interpark_account = Label(frame_group_header, text=translate[language_code]['interpark_account'])
+    lbl_interpark_account.grid(column=0, row=group_row_count, sticky = E)
+
+    global txt_interpark_account
+    txt_interpark_account_value = StringVar(frame_group_header, value=config_dict["advanced"]["interpark_account"].strip())
+    txt_interpark_account = Entry(frame_group_header, width=30, textvariable = txt_interpark_account_value)
+    txt_interpark_account.grid(column=1, row=group_row_count, sticky = W)
+
+    group_row_count +=1
+
+    global lbl_interpark_password
+    lbl_interpark_password = Label(frame_group_header, text=translate[language_code]['interpark_password'])
+    lbl_interpark_password.grid(column=0, row=group_row_count, sticky = E)
+
+    global txt_interpark_password
+    txt_interpark_password_value = StringVar(frame_group_header, value=decryptMe(config_dict["advanced"]["interpark_password"].strip()))
+    txt_interpark_password = Entry(frame_group_header, width=30, textvariable = txt_interpark_password_value, show="*")
+    txt_interpark_password.grid(column=1, row=group_row_count, sticky = W)
+
+    group_row_count +=1
+
+    global lbl_facebook_account
+    lbl_facebook_account = Label(frame_group_header, text=translate[language_code]['facebook_account'])
+    lbl_facebook_account.grid(column=0, row=group_row_count, sticky = E)
+
+    global txt_facebook_account
+    txt_facebook_account_value = StringVar(frame_group_header, value=config_dict["advanced"]["facebook_account"].strip())
+    txt_facebook_account = Entry(frame_group_header, width=30, textvariable = txt_facebook_account_value)
+    txt_facebook_account.grid(column=1, row=group_row_count, sticky = W)
+
+    group_row_count +=1
+
+    global lbl_facebook_password
+    lbl_facebook_password = Label(frame_group_header, text=translate[language_code]['facebook_password'])
+    lbl_facebook_password.grid(column=0, row=group_row_count, sticky = E)
+
+    global txt_facebook_password
+    txt_facebook_password_value = StringVar(frame_group_header, value=decryptMe(config_dict["advanced"]["facebook_password"].strip()))
+    txt_facebook_password = Entry(frame_group_header, width=30, textvariable = txt_facebook_password_value, show="*")
+    txt_facebook_password.grid(column=1, row=group_row_count, sticky = W)
+
+    group_row_count +=1
+
+    global lbl_save_password_alert
+    lbl_save_password_alert = Label(frame_group_header, fg="red", text=translate[language_code]['save_password_alert'])
+    lbl_save_password_alert.grid(column=0, row=group_row_count, columnspan=2, sticky = E)
+
+    frame_group_header.grid(column=0, row=row_count, padx=UI_PADDING_X)
+
+    row_count += 1
+
 
     # frame - user profile
     frame_user_profile = Frame(root)
@@ -838,7 +1185,7 @@ def PreferenctTab(root, config_dict, language_code, UI_PADDING_X):
 
     global combo_date_of_birth_year
     date_of_birth_year_option = []
-    for i in range(year-8, 1900, -1):
+    for i in range(year-8, 1905, -1):
         date_of_birth_year_option.append(str(i))
     combo_date_of_birth_year = ttk.Combobox(frame_date_of_birth, state="readonly", width=6)
     combo_date_of_birth_year['values'] = date_of_birth_year_option
@@ -907,15 +1254,9 @@ def PreferenctTab(root, config_dict, language_code, UI_PADDING_X):
     user_profile_row_count+=1
 
     # add second block to UI.
-    frame_user_profile.grid(column=0, row=row_count, sticky = W, padx=UI_PADDING_X)
-    row_count+=1
-
-    '''
-    lbl_hr = Label(root, text="")
-    lbl_hr.grid(column=0, row=row_count)
+    frame_user_profile.grid(column=0, row=row_count, padx=UI_PADDING_X)
 
     row_count+=1
-    '''
 
     # frame - credit card
     frame_cc = Frame(root)
@@ -1037,7 +1378,7 @@ def PreferenctTab(root, config_dict, language_code, UI_PADDING_X):
     cc_row_count+=1
 
     # add third block to UI.
-    frame_cc.grid(column=0, row=row_count, sticky = W, padx=UI_PADDING_X)
+    frame_cc.grid(column=0, row=row_count, padx=UI_PADDING_X)
 
 
 def AdvancedTab(root, config_dict, language_code, UI_PADDING_X):
@@ -1088,6 +1429,34 @@ def AdvancedTab(root, config_dict, language_code, UI_PADDING_X):
     chk_verbose = Checkbutton(frame_group_header, text=translate[language_code]['enable'], variable=chk_state_verbose)
     chk_verbose.grid(column=1, row=group_row_count, sticky = W)
 
+    group_row_count +=1
+
+    global lbl_ocr_captcha
+    lbl_ocr_captcha = Label(frame_group_header, text=translate[language_code]['ocr_captcha'])
+    lbl_ocr_captcha.grid(column=0, row=group_row_count, sticky = E)
+
+    global chk_state_ocr_captcha
+    chk_state_ocr_captcha = BooleanVar()
+    chk_state_ocr_captcha.set(config_dict['ocr_captcha']["enable"])
+
+    global chk_ocr_captcha
+    chk_ocr_captcha = Checkbutton(frame_group_header, text=translate[language_code]['enable'], variable=chk_state_ocr_captcha)
+    chk_ocr_captcha.grid(column=1, row=group_row_count, sticky = W)
+
+    group_row_count +=1
+
+    global lbl_ocr_captcha_ddddocr_beta
+    lbl_ocr_captcha_ddddocr_beta = Label(frame_group_header, text=translate[language_code]['ocr_captcha_ddddocr_beta'])
+    lbl_ocr_captcha_ddddocr_beta.grid(column=0, row=group_row_count, sticky = E)
+
+    global chk_state_ocr_captcha_ddddocr_beta
+    chk_state_ocr_captcha_ddddocr_beta = BooleanVar()
+    chk_state_ocr_captcha_ddddocr_beta.set(config_dict['ocr_captcha']["beta"])
+
+    global chk_ocr_captcha_ddddocr_beta
+    chk_ocr_captcha_ddddocr_beta = Checkbutton(frame_group_header, text=translate[language_code]['enable'], variable=chk_state_ocr_captcha_ddddocr_beta)
+    chk_ocr_captcha_ddddocr_beta.grid(column=1, row=group_row_count, sticky = W)
+
     frame_group_header.grid(column=0, row=row_count, padx=UI_PADDING_X)
 
 
@@ -1130,40 +1499,6 @@ def update_maxbot_runtime_status():
         lbl_maxbot_last_url_data.config(text=last_url)
     except Exception as exc:
         pass
-
-def AutofillTab(root, config_dict, language_code, UI_PADDING_X):
-    row_count = 0
-
-    frame_group_header = Frame(root)
-    group_row_count = 0
-
-    global lbl_facebook_account
-    lbl_facebook_account = Label(frame_group_header, text=translate[language_code]['facebook_account'])
-    lbl_facebook_account.grid(column=0, row=group_row_count, sticky = E)
-
-    global txt_facebook_account
-    txt_facebook_account_value = StringVar(frame_group_header, value=config_dict["advanced"]["facebook_account"].strip())
-    txt_facebook_account = Entry(frame_group_header, width=30, textvariable = txt_facebook_account_value)
-    txt_facebook_account.grid(column=1, row=group_row_count, sticky = W)
-
-    group_row_count +=1
-
-    global lbl_facebook_password
-    lbl_facebook_password = Label(frame_group_header, text=translate[language_code]['facebook_password'])
-    lbl_facebook_password.grid(column=0, row=group_row_count, sticky = E)
-
-    global txt_facebook_password
-    txt_facebook_password_value = StringVar(frame_group_header, value=decryptMe(config_dict["advanced"]["facebook_password"].strip()))
-    txt_facebook_password = Entry(frame_group_header, width=30, textvariable = txt_facebook_password_value, show="*")
-    txt_facebook_password.grid(column=1, row=group_row_count, sticky = W)
-
-    group_row_count +=1
-
-    global lbl_save_password_alert
-    lbl_save_password_alert = Label(frame_group_header, fg="red", text=translate[language_code]['save_password_alert'])
-    lbl_save_password_alert.grid(column=0, row=group_row_count, columnspan=2, sticky = E)
-
-    frame_group_header.grid(column=0, row=row_count, padx=UI_PADDING_X)
 
 def RuntimeTab(root, config_dict, language_code, UI_PADDING_X):
     row_count = 0
@@ -1312,9 +1647,9 @@ def load_GUI(root, config_dict):
     tab1 = Frame(tabControl)
     tabControl.add(tab1, text=translate[language_code]['preference'])
     tab2 = Frame(tabControl)
-    tabControl.add(tab2, text=translate[language_code]['advanced'])
+    tabControl.add(tab2, text=translate[language_code]['autofill'])
     tab3 = Frame(tabControl)
-    tabControl.add(tab3, text=translate[language_code]['autofill'])
+    tabControl.add(tab3, text=translate[language_code]['advanced'])
     tab4 = Frame(tabControl)
     tabControl.add(tab4, text=translate[language_code]['runtime'])
     tab5 = Frame(tabControl)
@@ -1328,8 +1663,8 @@ def load_GUI(root, config_dict):
     frame_action.grid(column=0, row=row_count)
 
     PreferenctTab(tab1, config_dict, language_code, UI_PADDING_X)
-    AdvancedTab(tab2, config_dict, language_code, UI_PADDING_X)
-    AutofillTab(tab3, config_dict, language_code, UI_PADDING_X)
+    AutofillTab(tab2, config_dict, language_code, UI_PADDING_X)
+    AdvancedTab(tab3, config_dict, language_code, UI_PADDING_X)
     RuntimeTab(tab4, config_dict, language_code, UI_PADDING_X)
     AboutTab(tab5, language_code)
 
@@ -1352,8 +1687,8 @@ def main():
 
     load_GUI(root, config_dict)
 
-    GUI_SIZE_WIDTH = 480
-    GUI_SIZE_HEIGHT = 510
+    GUI_SIZE_WIDTH = 500
+    GUI_SIZE_HEIGHT = 530
 
     GUI_SIZE_MACOS = str(GUI_SIZE_WIDTH) + 'x' + str(GUI_SIZE_HEIGHT)
     GUI_SIZE_WINDOWS=str(GUI_SIZE_WIDTH-60) + 'x' + str(GUI_SIZE_HEIGHT-90)
