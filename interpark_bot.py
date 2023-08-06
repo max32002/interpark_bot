@@ -1299,14 +1299,18 @@ def interpark_login(driver, account, password):
 
     return ret
 
-def escape_to_first_tab(driver):
+def escape_to_first_tab(driver, main_window_handle):
     try:
-        window_handles_count = len(driver.window_handles)
+        chwd = driver.window_handles
+        window_handles_count = len(chwd)
+        if window_handles_count == 1:
+            driver.switch_to.window(chwd[0])
         if window_handles_count > 1:
-            driver.switch_to.window(driver.window_handles[0])
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-            time.sleep(0.2)
+            for w in chwd:
+                #switch focus to child window
+                if (w!=main_window_handle):
+                    driver.switch_to.window(w)
+                    break
     except Exception as excSwithFail:
         pass
 
@@ -1421,23 +1425,52 @@ def interpark_event_detail(driver, config_dict, url):
                 
     return is_popup_opener_window
 
+
 def interpart_goto_step2(driver):
     show_debug_message = True       # debug.
     #show_debug_message = False      # online
 
-    print("interpart_goto_step2 start")
-    div_element = None
     try:
-        div_element = driver.find_element(By.CSS_SELECTOR,'#LargeNextBtnImage')
-        if not div_element is None:
-            if div_element.is_enabled():
-                if div_element.is_displayed():
-                    print("goto step 2")
-                    div_element.click()
+        driver.switch_to.default_content()
+    except Exception as exc:
+        pass
+
+    is_step_1_on = False
+    image_element = None
+    try:
+        my_css_selector = "div.step > ul > li.fir.s1 > a > img"
+        image_element = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+        image_src = image_element.get_attribute('src')
+        if "_on.gif" in image_src:
+            is_step_1_on = True
     except Exception as exc:
         if show_debug_message:
             print(exc)
         pass
+
+    is_next_btn_press = False
+
+    if show_debug_message:
+        print("is_step_1_on:", is_step_1_on)
+    if is_step_1_on:
+        btn_next = None
+        try:
+            my_css_selector = "#LargeNextBtnImage"
+            btn_next = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+            if not btn_next is None:
+                if btn_next.is_enabled():
+                    if btn_next.is_displayed():
+                        print("goto step 2")
+                        act = ActionChains(driver)
+                        act.move_to_element(btn_next).perform()
+                        btn_next.click()
+                        is_next_btn_press = True
+        except Exception as exc:
+            if show_debug_message:
+                print(exc)
+            pass
+
+    return is_next_btn_press    
 
 def interpark_get_ocr_answer(driver, ocr):
     show_debug_message = True       # debug.
@@ -1530,7 +1563,6 @@ def interpark_keyin_captcha_code(driver, form_verifyCode, answer = ""):
 def interpart_auto_ocr(driver, ocr, previous_answer):
     show_debug_message = True       # debug.
     show_debug_message = False      # online
-    print("start to ddddocr")
 
     is_need_redo_ocr = False
     is_form_sumbited = False
@@ -1545,6 +1577,7 @@ def interpart_auto_ocr(driver, ocr, previous_answer):
         pass
 
     if is_input_box_exist:
+        print("start to ddddocr")
         if show_debug_message:
             print("previous_answer:", previous_answer)
 
@@ -1562,6 +1595,12 @@ def interpart_auto_ocr(driver, ocr, previous_answer):
         else:
             ocr_answer = ocr_answer.strip()
             print("ocr_answer:", ocr_answer)
+
+            # for now, not able interact with target element.
+            if len(ocr_answer)!=6:
+                ocr_answer = ocr_answer + ocr_answer + ocr_answer + ocr_answer + ocr_answer + ocr_answer
+                ocr_answer = ocr_answer[:6]
+
             if len(ocr_answer)==6:
                 is_form_sumbited = interpark_keyin_captcha_code(driver, form_verifyCode, answer = ocr_answer)
             else:
@@ -1577,7 +1616,8 @@ def interpart_auto_ocr(driver, ocr, previous_answer):
                         pass
                     time.sleep(0.2)
     else:
-        print("input box not exist, quit ocr...")
+        #print("in this iframe, input box not exist, quit ocr...")
+        pass
 
     return is_need_redo_ocr, previous_answer, is_form_sumbited
 
@@ -1588,28 +1628,10 @@ def interpart_ocr_main(driver, config_dict, ocr):
         if not is_need_redo_ocr:
             break
 
-def interpart_captcha(driver, config_dict, ocr):
+def interpark_divBookSeat(driver, config_dict, ocr):
     show_debug_message = True       # debug.
     show_debug_message = False      # online
 
-    div_element = None
-    try:
-        div_element = driver.find_element(By.CSS_SELECTOR,'#imgCaptcha')
-        if not div_element is None:
-            if div_element.is_enabled():
-                if div_element.is_displayed():
-                    print("imgCaptcha popup, start to ocr")
-                    interpart_ocr_main(driver, config_dict, ocr)
-    except Exception as exc:
-        if show_debug_message:
-            print(exc)
-        pass
-    
-def interpark_divBookSeat(driver, config_dict, ocr):
-    show_debug_message = True       # debug.
-    #show_debug_message = False      # online
-
-    print("interpark_divBookSeat")
     is_ocr_iframe_travel = False
     div_element = None
     try:
@@ -1624,12 +1646,10 @@ def interpark_divBookSeat(driver, config_dict, ocr):
             print(exc)
         pass
 
-
     if is_ocr_iframe_travel:
-        frames = driver.find_elements(By.CSS_SELECTOR, 'iframe')
-        
         is_need_refresh = True
 
+        frames = driver.find_elements(By.CSS_SELECTOR, 'iframe')
         frame_index = 0
         for f in frames:
             frame_index += 1
@@ -1640,26 +1660,161 @@ def interpark_divBookSeat(driver, config_dict, ocr):
                 driver.switch_to.frame(f)
             except Exception as exc:
                 pass
-
             interpart_ocr_main(driver, config_dict, ocr)
-
             try:
                 driver.switch_to.default_content()
             except Exception as exc:
                 pass
 
-def interpart_booking(driver, config_dict, ocr):
-    interpart_goto_step2(driver)
+def interpart_price_seat_count(div_element):
+    is_seat_assigned = False
+    print("interpart_price_seat_count")
+    try:
+        if div_element.is_enabled():
+            if div_element.is_displayed():
+                select_obj = Select(div_element)
+                if not select_obj is None:
+                    seat_count = 0
+                    seat_count_options = select_obj.options
+                    if not seat_count_options is None:
+                        seat_count = len(seat_count_options)
 
-    if config_dict["ocr_captcha"]["enable"]:
-        if ocr is None:
-            print("ddddocr component is not able to use, you may running in arm environment.")
-        else:
-            interpark_divBookSeat(driver, config_dict, ocr)
+                    print("seat_count", seat_count)
+                    if seat_count > 0:
+                        select_obj.select_by_index(seat_count-1)
+                        is_seat_assigned = True
 
+    except Exception as exc:
+        print(exc)
+        pass
+
+    return is_seat_assigned
+
+def interpart_booking_goto_step4(driver):
+    show_debug_message = True       # debug.
+    #show_debug_message = False      # online
+
+    is_step_3_submited = False
+    btn_next = None
+    try:
+        btn_next = driver.find_element(By.CSS_SELECTOR,'#SmallNextBtnLink > img')
+        if not btn_next is None:
+            if btn_next.is_enabled():
+                if btn_next.is_displayed():
+                    print("goto step 4")
+
+                    act = ActionChains(driver)
+                    act.move_to_element(btn_next).perform()
+
+                    btn_next.click()
+                    is_step_3_submited = True
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+    return is_step_3_submited
+
+def interpark_assign_seat_count(driver):
+    is_seat_assigned = False
+    
+    div_element_list = None
+    try:
+        div_element_list = driver.find_elements(By.CSS_SELECTOR,'td > select')
+        if not div_element_list is None:
+            print("select count:", len(div_element_list))
+            if len(div_element_list) > 0:
+                for div_element in div_element_list:
+                    is_seat_assigned = interpart_price_seat_count(div_element)
+                    print("is_seat_assigned:", is_seat_assigned)
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+    
+    return is_seat_assigned
+
+def interpart_price_discount(driver, config_dict):
+    show_debug_message = True       # debug.
+    #show_debug_message = False      # online
+
+    try:
+        driver.switch_to.default_content()
+    except Exception as exc:
+        pass
+
+    is_step_3_on = False
+    image_element = None
+    try:
+        my_css_selector = "div.step > ul > li.s3 > a > img"
+        image_element = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+        image_src = image_element.get_attribute('src')
+        if "_on.gif" in image_src:
+            is_step_3_on = True
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+    is_next_btn_press = False
+
+    if show_debug_message:
+        print("is_step_3_on:", is_step_3_on)
+
+    is_step_3_submited = False
+    if is_step_3_on:
+        print("interpart_price_discount")
+
+        iframe_BookStep = None
+        try:
+            iframe_BookStep = driver.find_element(By.CSS_SELECTOR,'#ifrmBookStep')
+            if not iframe_BookStep is None:
+                if iframe_BookStep.is_enabled():
+                    if iframe_BookStep.is_displayed():
+                        try:
+                            driver.switch_to.frame(iframe_BookStep)
+                        except Exception as exc:
+                            pass
+
+                        is_seat_assigned = interpark_assign_seat_count(driver)
+
+                        try:
+                            driver.switch_to.default_content()
+                        except Exception as exc:
+                            pass
+
+                        # press next button.
+                        if is_seat_assigned:
+                            is_step_3_submited = interpart_booking_goto_step4(driver)
+
+        except Exception as exc:
+            if show_debug_message:
+                print(exc)
+            pass
+
+    return is_step_3_submited
+
+
+def interpart_booking(driver, config_dict, ocr, is_step_1_submited):
+    if not is_step_1_submited:
+        is_step_1_submited = interpart_goto_step2(driver)
+
+    if is_step_1_submited:
+        if config_dict["ocr_captcha"]["enable"]:
+            if ocr is None:
+                print("ddddocr component is not able to use, you may running in arm environment.")
+            else:
+                interpark_divBookSeat(driver, config_dict, ocr)
+                pass
+
+        is_step_3_submited = interpart_price_discount(driver, config_dict)
+
+        interpark_fill_profile(driver, config_dict)
+
+    return is_step_1_submited
 
 def interpark_main(driver, config_dict, url, ocr, interpark_dict):
-    escape_to_first_tab(driver)
+    escape_to_first_tab(driver, interpark_dict["main_window_handle"])
 
     if "globalinterpark.com/user/signin" in url:
         interpark_account = config_dict["advanced"]["interpark_account"]
@@ -1676,7 +1831,9 @@ def interpark_main(driver, config_dict, url, ocr, interpark_dict):
         interpark_dict["opener_popuped"] = False
 
     if "/Global/Play/Book/BookMain.asp" in url:
-        interpart_booking(driver, config_dict, ocr)
+        interpark_dict["is_step_1_submited"] = interpart_booking(driver, config_dict, ocr, interpark_dict["is_step_1_submited"])
+    else:
+        interpark_dict["is_step_1_submited"] = False
 
     return interpark_dict
 
@@ -1695,6 +1852,8 @@ def main(args):
 
     interpark_dict = {}
     interpark_dict["opener_popuped"] = False
+    interpark_dict["main_window_handle"] = None
+    interpark_dict["is_step_1_submited"] = False
 
     ocr = None
     try:
@@ -1744,6 +1903,9 @@ def main(args):
             last_url = url
 
         if "globalinterpark.com" in url:
+            if interpark_dict["main_window_handle"] is None:
+                interpark_dict["main_window_handle"] = driver.current_window_handle
+
             interpark_dict = interpark_main(driver, config_dict, url, ocr, interpark_dict)
 
         # for facebook
