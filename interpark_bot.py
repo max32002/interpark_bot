@@ -22,6 +22,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 # for selenium 4
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.action_chains import ActionChains
 # for wait #1
 import time
 # for error output
@@ -991,6 +992,9 @@ def interpart_date_auto_select(driver, config_dict):
                 # skip this round wait ajax return.
                 area_list = None
                 try:
+                    act = ActionChains(driver)
+                    act.move_to_element(form_select).perform()
+
                     form_select.click()
                     time.sleep(0.1)
                     form_select.click()
@@ -998,9 +1002,9 @@ def interpart_date_auto_select(driver, config_dict):
                     pass
             else:
                 # normal case.
-                selected_option = select_obj.first_selected_option
                 option_value = ""
                 try:
+                    selected_option = select_obj.first_selected_option
                     option_value = selected_option.get_attribute('value')
                 except Exception as exc:
                     pass
@@ -1029,7 +1033,9 @@ def interpart_date_auto_select(driver, config_dict):
                 row_is_enabled=True
 
                 if row_is_enabled:
-                    formated_area_list.append(row)
+                    # force to skip first option.
+                    if row_index > 1:
+                        formated_area_list.append(row)
 
     matched_blocks = []
     if formated_area_list is not None:
@@ -1139,9 +1145,9 @@ def interpart_time_auto_select(driver, config_dict):
                 area_list = None
             else:
                 # normal case.
-                selected_option = select_obj.first_selected_option
                 option_value = ""
                 try:
+                    selected_option = select_obj.first_selected_option
                     option_value = selected_option.get_attribute('value')
                 except Exception as exc:
                     pass
@@ -1170,7 +1176,9 @@ def interpart_time_auto_select(driver, config_dict):
                 row_is_enabled=True
 
                 if row_is_enabled:
-                    formated_area_list.append(row)
+                    # force to skip first option.
+                    if row_index > 1:
+                        formated_area_list.append(row)
 
     matched_blocks = []
     if formated_area_list is not None:
@@ -1291,14 +1299,7 @@ def interpark_login(driver, account, password):
 
     return ret
 
-
-def interpark_main(driver, config_dict, url):
-    show_debug_message = True       # debug.
-    show_debug_message = False      # online
-
-    if config_dict["advanced"]["verbose"]:
-        show_debug_message = True
-
+def escape_to_first_tab(driver):
     try:
         window_handles_count = len(driver.window_handles)
         if window_handles_count > 1:
@@ -1309,57 +1310,95 @@ def interpark_main(driver, config_dict, url):
     except Exception as excSwithFail:
         pass
 
-    if "globalinterpark.com/user/signin" in url:
-        interpark_account = config_dict["advanced"]["interpark_account"]
-        if len(interpark_account) > 2:
-            interpark_login(driver, interpark_account, decryptMe(config_dict["advanced"]["interpark_password"]))
+def hide_bookingGuideLayer(driver):
+    div_element = None
+    try:
+        div_element = driver.find_element(By.CSS_SELECTOR,'#bookingGuideLayer')
+        if not div_element is None:
+            if div_element.is_displayed():
+                js = "CloseBookingLayer();"
+                driver.set_script_timeout(1)
+                driver.execute_script(js)
+    except Exception as exc:
+        pass
 
+def hide_capchaLayer(driver):
+    div_element = None
+    try:
+        div_element = driver.find_element(By.CSS_SELECTOR,'#capchaLayer')
+        if not div_element is None:
+            if div_element.is_displayed():
+                js = "$('capchaLayer').hide();"
+                driver.set_script_timeout(1)
+                driver.execute_script(js)
+    except Exception as exc:
+        pass
 
-    if "globalinterpark.com/main/main" in url:
-        interpark_change_locale(driver, config_dict)
+def interpark_event_detail(driver, config_dict, url):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
 
-    if "globalinterpark.com/detail/edetail?prdNo=" in url:
-        if config_dict["date_auto_select"]["enable"]:
-            # get iframes
-            frames = driver.find_elements(By.CSS_SELECTOR, 'iframe')
-            
-            is_need_refresh = True
+    if config_dict["advanced"]["verbose"]:
+        show_debug_message = True
 
-            frame_index = 0
-            for f in frames:
-                frame_index += 1
-                if show_debug_message:
-                    print("search at frame index:", frame_index)
+    is_popup_opener_window = False
+    if config_dict["date_auto_select"]["enable"]:
+        # get iframes
+        frames = driver.find_elements(By.CSS_SELECTOR, 'iframe')
+        
+        is_need_refresh = True
 
+        frame_index = 0
+        for f in frames:
+            frame_index += 1
+            if show_debug_message:
+                print("search at frame index:", frame_index)
+
+            try:
+                driver.switch_to.frame(f)
+            except Exception as exc:
+                pass
+
+            hide_bookingGuideLayer(driver)
+            hide_capchaLayer(driver)
+
+            is_date_assign_by_bot, is_select_exist = interpart_date_auto_select(driver, config_dict)
+            if is_select_exist:
+                is_need_refresh = False
+            if show_debug_message:
+                print("is_date_assign_by_bot:", is_date_assign_by_bot)
+
+            is_time_assign_by_bot = False
+            if is_date_assign_by_bot:
+                if config_dict["time_auto_select"]["enable"]:
+                    is_time_assign_by_bot, is_select_exist = interpart_time_auto_select(driver, config_dict)
+
+            if is_time_assign_by_bot:
+                my_css_selector = 'div.btn_Booking > img'
+                btn_buy_tickets = None
                 try:
-                    driver.switch_to.frame(f)
+                    btn_buy_tickets = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+                    if btn_buy_tickets is not None:
+                        print("waiting seat info ajax ready...")
+                        print("start to popup opener.")
+                        act = ActionChains(driver)
+                        act.move_to_element(btn_buy_tickets).perform()
+                        btn_buy_tickets.click()
+                        is_popup_opener_window = True
                 except Exception as exc:
+                    if show_debug_message:
+                        print(exc)
                     pass
 
-                is_date_assign_by_bot, is_select_exist = interpart_date_auto_select(driver, config_dict)
-                if is_select_exist:
-                    is_need_refresh = False
-                if show_debug_message:
-                    print("is_date_assign_by_bot:", is_date_assign_by_bot)
+            try:
+                driver.switch_to.default_content()
+            except Exception as exc:
+                pass
 
-                is_time_assign_by_bot = False
-                if is_date_assign_by_bot:
-                    if config_dict["time_auto_select"]["enable"]:
-                        is_time_assign_by_bot, is_select_exist = interpart_time_auto_select(driver, config_dict)
+            if is_popup_opener_window:
+                break
 
-                if is_time_assign_by_bot:
-                    js="javascript:fnNormalBooking();"
-                    try:
-                        driver.set_script_timeout(1)
-                        driver.execute_script(js)
-                    except Exception as exc:
-                        pass
-
-                try:
-                    driver.switch_to.default_content()
-                except Exception as exc:
-                    pass
-
+        if not is_popup_opener_window:
             if is_need_refresh:
                 try:
                     driver.refresh()
@@ -1367,6 +1406,279 @@ def interpark_main(driver, config_dict, url):
                 except Exception as exc:
                     pass
 
+    if is_popup_opener_window:
+        for i in range(20):
+            try:
+                window_handles_count = len(driver.window_handles)
+                if window_handles_count == 1:
+                    print("waiting for popup window...")
+                    time.sleep(0.2)
+                else:
+                    print("new tab is opened.")
+                    break
+            except Exception as excSwithFail:
+                pass
+                
+    return is_popup_opener_window
+
+def interpart_goto_step2(driver):
+    show_debug_message = True       # debug.
+    #show_debug_message = False      # online
+
+    print("interpart_goto_step2 start")
+    div_element = None
+    try:
+        div_element = driver.find_element(By.CSS_SELECTOR,'#LargeNextBtnImage')
+        if not div_element is None:
+            if div_element.is_enabled():
+                if div_element.is_displayed():
+                    print("goto step 2")
+                    div_element.click()
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+def interpark_get_ocr_answer(driver, ocr):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
+
+    ocr_answer = None
+    if not ocr is None:
+        img_base64 = None
+
+        image_id = 'imgCaptcha'
+        image_element = None
+        try:
+            my_css_selector = "#" + image_id
+            image_element = driver.find_elements(By.CSS_SELECTOR, my_css_selector)
+        except Exception as exc:
+            pass
+
+        if not image_element is None:
+            try:
+                driver.set_script_timeout(1)
+                form_verifyCode_base64 = driver.execute_async_script("""
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    var img = document.getElementById('%s');
+                    if(img!=null) {
+                    canvas.height = img.naturalHeight;
+                    canvas.width = img.naturalWidth;
+                    context.drawImage(img, 0, 0);
+                    callback = arguments[arguments.length - 1];
+                    callback(canvas.toDataURL()); }
+                    """ % (image_id))
+                if not form_verifyCode_base64 is None:
+                    img_base64 = base64.b64decode(form_verifyCode_base64.split(',')[1])
+            except Exception as exc:
+                if show_debug_message:
+                    print("canvas exception:", str(exc))
+                pass
+
+        if not img_base64 is None:
+            try:
+                ocr_answer = ocr.classification(img_base64)
+            except Exception as exc:
+                pass
+
+    return ocr_answer
+
+def interpark_keyin_captcha_code(driver, form_verifyCode, answer = ""):
+    is_form_sumbited = False
+
+    if form_verifyCode is not None:
+        is_visible = False
+        try:
+            if form_verifyCode.is_enabled():
+                is_visible = True
+        except Exception as exc:
+            pass
+
+        inputed_value = None
+        try:
+            inputed_value = form_verifyCode.get_attribute('value')
+        except Exception as exc:
+            print("find verify code fail")
+            pass
+
+        if inputed_value is None:
+            inputed_value = ""
+            is_visible = False
+
+        if is_visible:
+            try:
+                form_verifyCode.click()
+            except Exception as exc:
+                #print(exc)
+                pass
+
+            if len(answer) > 0:
+                answer = answer.upper()
+                try:
+                    form_verifyCode.send_keys(answer)
+                    form_verifyCode.send_keys(Keys.ENTER)
+                    is_form_sumbited = True
+                except Exception as exc:
+                    print("send_keys ocr answer fail.")
+                    #print(exc)
+                    pass
+
+
+    return is_form_sumbited
+
+def interpart_auto_ocr(driver, ocr, previous_answer):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
+    print("start to ddddocr")
+
+    is_need_redo_ocr = False
+    is_form_sumbited = False
+
+    is_input_box_exist = False
+
+    form_verifyCode = None
+    try:
+        form_verifyCode = driver.find_element(By.ID, 'txtCaptcha')
+        is_input_box_exist = True
+    except Exception as exc:
+        pass
+
+    if is_input_box_exist:
+        if show_debug_message:
+            print("previous_answer:", previous_answer)
+
+        ocr_start_time = time.time()
+        ocr_answer = interpark_get_ocr_answer(driver, ocr)
+        ocr_done_time = time.time()
+        ocr_elapsed_time = ocr_done_time - ocr_start_time
+        print("ocr elapsed time:", "{:.3f}".format(ocr_elapsed_time))
+
+        if ocr_answer is None:
+            # page is not ready, retry again.
+            # PS: usually occur in async script get captcha image.
+            is_need_redo_ocr = True
+            time.sleep(0.1)
+        else:
+            ocr_answer = ocr_answer.strip()
+            print("ocr_answer:", ocr_answer)
+            if len(ocr_answer)==6:
+                is_form_sumbited = interpark_keyin_captcha_code(driver, form_verifyCode, answer = ocr_answer)
+            else:
+                is_need_redo_ocr = True
+                if previous_answer != ocr_answer:
+                    previous_answer = ocr_answer
+                    print("change to new captcha.")
+                    try:
+                        js = "fnCapchaRefresh();"
+                        driver.set_script_timeout(1)
+                        driver.execute_script(js)
+                    except Exception as exc:
+                        pass
+                    time.sleep(0.2)
+    else:
+        print("input box not exist, quit ocr...")
+
+    return is_need_redo_ocr, previous_answer, is_form_sumbited
+
+def interpart_ocr_main(driver, config_dict, ocr):
+    previous_answer = None
+    for redo_ocr in range(999):
+        is_need_redo_ocr, previous_answer, is_form_sumbited = interpart_auto_ocr(driver, ocr, previous_answer)
+        if not is_need_redo_ocr:
+            break
+
+def interpart_captcha(driver, config_dict, ocr):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
+
+    div_element = None
+    try:
+        div_element = driver.find_element(By.CSS_SELECTOR,'#imgCaptcha')
+        if not div_element is None:
+            if div_element.is_enabled():
+                if div_element.is_displayed():
+                    print("imgCaptcha popup, start to ocr")
+                    interpart_ocr_main(driver, config_dict, ocr)
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+    
+def interpark_divBookSeat(driver, config_dict, ocr):
+    show_debug_message = True       # debug.
+    #show_debug_message = False      # online
+
+    print("interpark_divBookSeat")
+    is_ocr_iframe_travel = False
+    div_element = None
+    try:
+        div_element = driver.find_element(By.CSS_SELECTOR,'#divBookSeat')
+        if not div_element is None:
+            if div_element.is_enabled():
+                if div_element.is_displayed():
+                    print("divBookSeat popup")
+                    is_ocr_iframe_travel = True
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+
+    if is_ocr_iframe_travel:
+        frames = driver.find_elements(By.CSS_SELECTOR, 'iframe')
+        
+        is_need_refresh = True
+
+        frame_index = 0
+        for f in frames:
+            frame_index += 1
+            if show_debug_message:
+                print("search at frame index:", frame_index)
+
+            try:
+                driver.switch_to.frame(f)
+            except Exception as exc:
+                pass
+
+            interpart_ocr_main(driver, config_dict, ocr)
+
+            try:
+                driver.switch_to.default_content()
+            except Exception as exc:
+                pass
+
+def interpart_booking(driver, config_dict, ocr):
+    interpart_goto_step2(driver)
+
+    if config_dict["ocr_captcha"]["enable"]:
+        if ocr is None:
+            print("ddddocr component is not able to use, you may running in arm environment.")
+        else:
+            interpark_divBookSeat(driver, config_dict, ocr)
+
+
+def interpark_main(driver, config_dict, url, ocr, interpark_dict):
+    escape_to_first_tab(driver)
+
+    if "globalinterpark.com/user/signin" in url:
+        interpark_account = config_dict["advanced"]["interpark_account"]
+        if len(interpark_account) > 2:
+            interpark_login(driver, interpark_account, decryptMe(config_dict["advanced"]["interpark_password"]))
+
+    if "globalinterpark.com/main/main" in url:
+        interpark_change_locale(driver, config_dict)
+
+    if "globalinterpark.com/detail/edetail?prdNo=" in url:
+        if not interpark_dict["opener_popuped"]:
+            interpark_dict["opener_popuped"] = interpark_event_detail(driver, config_dict, url)
+    else:
+        interpark_dict["opener_popuped"] = False
+
+    if "/Global/Play/Book/BookMain.asp" in url:
+        interpart_booking(driver, config_dict, ocr)
+
+    return interpark_dict
 
 def main(args):
     config_dict = get_config_dict(args)
@@ -1380,6 +1692,9 @@ def main(args):
     # internal variable. 說明：這是一個內部變數，請略過。
     url = ""
     last_url = ""
+
+    interpark_dict = {}
+    interpark_dict["opener_popuped"] = False
 
     ocr = None
     try:
@@ -1429,7 +1744,7 @@ def main(args):
             last_url = url
 
         if "globalinterpark.com" in url:
-            interpark_main(driver, config_dict, url)
+            interpark_dict = interpark_main(driver, config_dict, url, ocr, interpark_dict)
 
         # for facebook
         facebook_login_url = 'https://www.facebook.com/login.php?'
