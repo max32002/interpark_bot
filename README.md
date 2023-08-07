@@ -5,13 +5,14 @@ help you quickly fill your order form online.
 
 # Demo (示範影片)
 
+Max Interpark Bot 2023-08-05 自動填表單與勾選
+
+https://youtu.be/vE6BgPTSzBI
+
 Max Interpark Bot 2023-08-01 自動驗證碼
 
 https://youtu.be/2bFhGDBXIBE
 
-Max Interpark Bot 2023-08-05 自動填表單與勾選
-
-https://youtu.be/vE6BgPTSzBI
 
 
 # Feature (主要功能)
@@ -22,6 +23,8 @@ https://youtu.be/vE6BgPTSzBI
 * 自動關閉「Booking Info」訊息框框。
 * 自動關閉「Secure Booking service」說明訊息框框。
 * 自動猜測與輸入驗證碼，需要人工手動地點擊輸入。驗證碼可能會猜錯。
+* 自動填入個人/信用卡資料。
+* 自動勾選 I agree。
 
 
 # How to use (如何使用)
