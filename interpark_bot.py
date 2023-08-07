@@ -50,7 +50,7 @@ except Exception as exc:
 import argparse
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.02)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.03)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -228,8 +228,8 @@ def load_chromdriver_normal(config_dict, driver_type):
         os.mkdir(webdriver_path)
 
     if not os.path.exists(chromedriver_path):
-        print("WebDriver not exist, try to download...")
-        chromedriver_autoinstaller.install(path="webdriver", make_version_dir=False)
+        print("WebDriver not exist, try to download to:", webdriver_path)
+        chromedriver_autoinstaller.install(path=webdriver_path, make_version_dir=False)
 
     if not os.path.exists(chromedriver_path):
         print("Please download chromedriver and extract zip to webdriver folder from this url:")
@@ -284,7 +284,6 @@ def load_chromdriver_normal(config_dict, driver_type):
     return driver
 
 def clean_uc_exe_cache():
-    is_cache_exist = False
     exe_name = "chromedriver%s"
 
     platform = sys.platform
@@ -295,6 +294,7 @@ def clean_uc_exe_cache():
     if platform.endswith("darwin"):
         exe_name %= ""
 
+    d = ""
     if platform.endswith("win32"):
         d = "~/appdata/roaming/undetected_chromedriver"
     elif "LAMBDA_TASK_ROOT" in os.environ:
@@ -307,16 +307,17 @@ def clean_uc_exe_cache():
         d = "~/.undetected_chromedriver"
     data_path = os.path.abspath(os.path.expanduser(d))
 
+    is_cache_exist = False
     p = pathlib.Path(data_path)
     files = list(p.rglob("*chromedriver*?"))
     for file in files:
-        is_cache_exist = True
-        try:
-            os.unlink(str(file))
-        except PermissionError:
-            pass
-        except FileNotFoundError:
-            pass
+        if os.path.exists(str(file)):
+            is_cache_exist = True
+            try:
+                os.unlink(str(file))
+            except Exception as exc2:
+                print(exc2)
+                pass
 
     return is_cache_exist
 
@@ -337,8 +338,10 @@ def load_chromdriver_uc(config_dict):
         os.mkdir(webdriver_path)
 
     if not os.path.exists(chromedriver_path):
-        print("WebDriver not exist, try to download...")
-        chromedriver_autoinstaller.install(path="webdriver", make_version_dir=False)
+        print("ChromeDriver not exist, try to download to:", webdriver_path)
+        chromedriver_autoinstaller.install(path=webdriver_path, make_version_dir=False)
+    else:
+        print("ChromeDriver exist:", chromedriver_path)
 
     options = uc.ChromeOptions()
     options.page_load_strategy = 'eager'
@@ -396,13 +399,13 @@ def load_chromdriver_uc(config_dict):
 
             # remove exist chromedriver, download again.
             try:
+                print("Deleting exist and download ChromeDriver again.")
                 os.unlink(chromedriver_path)
-            except PermissionError:
-                pass
-            except FileNotFoundError:
+            except Exception as exc2:
+                print(exc2)
                 pass
 
-            chromedriver_autoinstaller.install(path="webdriver", make_version_dir=False)
+            chromedriver_autoinstaller.install(path=webdriver_path, make_version_dir=False)
             try:
                 driver = uc.Chrome(driver_executable_path=chromedriver_path, options=options, headless=config_dict["advanced"]["headless"])
             except Exception as exc2:
