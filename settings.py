@@ -23,7 +23,7 @@ import subprocess
 import json
 import datetime
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.03)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.05)"
 
 CONST_MAXBOT_CONFIG_FILE = "settings.json"
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"

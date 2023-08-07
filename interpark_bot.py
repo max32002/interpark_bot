@@ -50,7 +50,7 @@ except Exception as exc:
 import argparse
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.03)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.05)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -714,6 +714,55 @@ def force_press_button_iframe(driver, f, select_by, select_query, force_submit=T
 
     return is_clicked
 
+def check_checkbox(driver, by, query):
+    show_debug_message = True       # debug.
+    show_debug_message = False      # online
+
+    agree_checkbox = None
+    try:
+        agree_checkbox = driver.find_element(by, query)
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+    is_checkbox_checked = False
+    if agree_checkbox is not None:
+        is_checkbox_checked = force_check_checkbox(driver, agree_checkbox)
+    return is_checkbox_checked
+
+def force_check_checkbox(driver, agree_checkbox):
+    is_finish_checkbox_click = False
+    if agree_checkbox is not None:
+        is_visible = False
+        try:
+            if agree_checkbox.is_enabled():
+                is_visible = True
+        except Exception as exc:
+            pass
+
+        if is_visible:
+            is_checkbox_checked = False
+            try:
+                if agree_checkbox.is_selected():
+                    is_checkbox_checked = True
+            except Exception as exc:
+                pass
+
+            if not is_checkbox_checked:
+                #print('send check to checkbox')
+                try:
+                    agree_checkbox.click()
+                    is_finish_checkbox_click = True
+                except Exception as exc:
+                    try:
+                        driver.execute_script("arguments[0].click();", agree_checkbox)
+                        is_finish_checkbox_click = True
+                    except Exception as exc:
+                        pass
+            else:
+                is_finish_checkbox_click = True
+    return is_finish_checkbox_click
+
 def force_press_button(driver, select_by, select_query, force_submit=True):
     is_clicked = False
     next_step_button = None
@@ -746,63 +795,101 @@ def force_press_button(driver, select_by, select_query, force_submit=True):
                         pass
     return is_clicked
 
-def facebook_login(driver, account, password):
-    ret = False
-    el_email = None
-    try:
-        el_email = driver.find_element(By.CSS_SELECTOR, '#email')
-    except Exception as exc:
-        pass
+def assign_select_by_text(driver, by, query, val):
+    show_debug_message = True    # debug.
+    show_debug_message = False   # online
+
+    if val is None:
+        val = ""
+
+    is_text_sent = False
+    if len(val) > 0:
+        el_text = None
+        try:
+            el_text = driver.find_element(by, query)
+        except Exception as exc:
+            if show_debug_message:
+                print(exc)
+            pass
+
+        select_obj = None
+        if el_text is not None:
+            try:
+                if el_text.is_enabled() and el_text.is_displayed():
+                    select_obj = Select(el_text)
+                    if not select_obj is None:
+                        select_obj.select_by_visible_text(val)
+                        is_text_sent = True
+            except Exception as exc:
+                if show_debug_message:
+                    print(exc)
+                pass
+            
+    return is_text_sent
+
+def assign_text(driver, by, query, val, overwrite = False, submit=False):
+    show_debug_message = True    # debug.
+    show_debug_message = False   # online
+
+    if val is None:
+        val = ""
 
     is_visible = False
-    if el_email is not None:
+
+    if len(val) > 0:
+        el_text = None
         try:
-            if el_email.is_enabled():
-                is_visible = True
+            el_text = driver.find_element(by, query)
         except Exception as exc:
+            if show_debug_message:
+                print(exc)
             pass
 
-    is_email_sent = False
+        if el_text is not None:
+            try:
+                if el_text.is_enabled() and el_text.is_displayed():
+                    is_visible = True
+            except Exception as exc:
+                if show_debug_message:
+                    print(exc)
+                pass
+
+    is_text_sent = False
     if is_visible:
         try:
-            inputed_text = el_email.get_attribute('value')
+            inputed_text = el_text.get_attribute('value')
             if inputed_text is not None:
+                is_do_keyin = False
                 if len(inputed_text) == 0:
-                    el_email.send_keys(account)
-                    is_email_sent = True
+                    is_do_keyin = True
                 else:
-                    if inputed_text == account:
-                        is_email_sent = True
-        except Exception as exc:
-            pass
+                    if inputed_text == val:
+                        is_text_sent = True
+                    else:
+                        if overwrite:
+                            el_text.clear()
+                            is_do_keyin = True
 
-    el_pass = None
-    if is_email_sent:
-        try:
-            el_pass = driver.find_element(By.CSS_SELECTOR, '#pass')
+                if is_do_keyin:
+                    el_text.click()
+                    el_text.send_keys(val)
+                    if submit:
+                        el_text.send_keys(Keys.ENTER)
+                    is_text_sent = True
         except Exception as exc:
+            if show_debug_message:
+                print(exc)
             pass
+            
+    return is_text_sent
 
+
+def facebook_login(driver, account, password):
+    is_email_sent = assign_text(driver, By.CSS_SELECTOR, '#email', account)
     is_password_sent = False
-    if el_pass is not None:
-        try:
-            if el_pass.is_enabled():
-                inputed_text = el_pass.get_attribute('value')
-                if inputed_text is not None:
-                    if len(inputed_text) == 0:
-                        el_pass.click()
-                        if(len(password)>0):
-                            el_pass.send_keys(password)
-                            el_pass.send_keys(Keys.ENTER)
-                            is_password_sent = True
-                        time.sleep(0.1)
-        except Exception as exc:
-            print(exc)
-            pass
-
-    ret = is_password_sent
-
-    return ret
+    if is_email_sent:
+        is_password_sent = assign_text(driver, By.CSS_SELECTOR, '#pass', password, submit=True)
+    return is_password_sent
 
 def interpark_get_local_code(locale_title):
     code = "en"
@@ -1247,60 +1334,11 @@ def interpart_time_auto_select(driver, config_dict):
     return is_time_assign_by_bot, is_select_exist
 
 def interpark_login(driver, account, password):
-    ret = False
-    el_email = None
-    try:
-        el_email = driver.find_element(By.CSS_SELECTOR, '#memEmail')
-    except Exception as exc:
-        #print("find #email fail")
-        #print(exc)
-        pass
-
-    is_visible = False
-    if el_email is not None:
-        try:
-            if el_email.is_enabled():
-                is_visible = True
-        except Exception as exc:
-            pass
-
-    is_email_sent = False
-    if is_visible:
-        try:
-            inputed_text = el_email.get_attribute('value')
-            if inputed_text is not None:
-                if len(inputed_text) == 0:
-                    el_email.send_keys(account)
-                    is_email_sent = True
-                else:
-                    if inputed_text == account:
-                        is_email_sent = True
-        except Exception as exc:
-            pass
-
-    el_pass = None
-    if is_email_sent:
-        try:
-            el_pass = driver.find_element(By.CSS_SELECTOR, '#memPass')
-        except Exception as exc:
-            pass
-
+    is_email_sent = assign_text(driver, By.CSS_SELECTOR, '#memEmail', account)
     is_password_sent = False
-    if el_pass is not None:
-        try:
-            if el_pass.is_enabled():
-                inputed_text = el_pass.get_attribute('value')
-                if inputed_text is not None:
-                    if len(inputed_text) == 0:
-                        el_pass.click()
-                        if(len(password)>0):
-                            el_pass.send_keys(password)
-                            el_pass.send_keys(Keys.ENTER)
-                            is_password_sent = True
-        except Exception as exc:
-            pass
-
-    return ret
+    if is_email_sent:
+        is_password_sent = assign_text(driver, By.CSS_SELECTOR, '#memPass', password, submit=True)
+    return is_password_sent
 
 def escape_to_first_tab(driver, main_window_handle):
     try:
@@ -1466,6 +1504,7 @@ def interpart_goto_step2(driver):
                         print("goto step 2")
                         act = ActionChains(driver)
                         act.move_to_element(btn_next).perform()
+                        time.sleep(0.2)
                         btn_next.click()
                         is_next_btn_press = True
         except Exception as exc:
@@ -1693,7 +1732,7 @@ def interpart_price_seat_count(div_element):
 
     return is_seat_assigned
 
-def interpart_booking_goto_step4(driver):
+def interpart_booking_click_small_next_btn(driver):
     show_debug_message = True       # debug.
     #show_debug_message = False      # online
 
@@ -1736,6 +1775,7 @@ def interpark_assign_seat_count(driver):
         pass
     
     return is_seat_assigned
+
 
 def interpart_price_discount(driver, config_dict):
     show_debug_message = True       # debug.
@@ -1788,7 +1828,7 @@ def interpart_price_discount(driver, config_dict):
 
                         # press next button.
                         if is_seat_assigned:
-                            is_step_3_submited = interpart_booking_goto_step4(driver)
+                            is_step_3_submited = interpart_booking_click_small_next_btn(driver)
 
         except Exception as exc:
             if show_debug_message:
@@ -1797,6 +1837,212 @@ def interpart_price_discount(driver, config_dict):
 
     return is_step_3_submited
 
+def interpark_fill_confirmation(driver, config_dict):
+    is_MemberName_sent = assign_text(driver, By.CSS_SELECTOR, '#MemberName', config_dict["user_name"])
+    is_BirYear_sent = assign_select_by_text(driver, By.CSS_SELECTOR, '#BirYear', config_dict["user_date_of_birth_year"])
+    is_BirMonth_sent = assign_select_by_text(driver, By.CSS_SELECTOR, '#BirMonth', config_dict["user_date_of_birth_month"])
+    is_BirDay_sent = assign_select_by_text(driver, By.CSS_SELECTOR, '#BirDay', config_dict["user_date_of_birth_day"])
+    if len(config_dict["user_email"]) > 0:
+        is_Email_sent = assign_text(driver, By.CSS_SELECTOR, '#Email', config_dict["user_email"])
+    else:
+        is_Email_sent = True
+    is_PhoneNo_sent = assign_text(driver, By.CSS_SELECTOR, '#PhoneNo', config_dict["user_phone_number"])
+    is_HpNo_sent = assign_text(driver, By.CSS_SELECTOR, '#HpNo', config_dict["user_cell_phone"])
+
+    is_form_all_filled = True
+    if not is_MemberName_sent:
+        is_form_all_filled = False
+    if not is_BirYear_sent:
+        is_form_all_filled = False
+    if not is_BirMonth_sent:
+        is_form_all_filled = False
+    if not is_BirDay_sent:
+        is_form_all_filled = False
+    if not is_Email_sent:
+        is_form_all_filled = False
+    if not is_PhoneNo_sent:
+        is_form_all_filled = False
+    if not is_HpNo_sent:
+        is_form_all_filled = False
+    return is_form_all_filled
+
+
+def interpark_fill_profile(driver, config_dict):
+    show_debug_message = True       # debug.
+    #show_debug_message = False      # online
+
+    try:
+        driver.switch_to.default_content()
+    except Exception as exc:
+        pass
+
+    is_step_4_on = False
+    image_element = None
+    try:
+        my_css_selector = "div.step > ul > li.s4 > a > img"
+        image_element = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+        image_src = image_element.get_attribute('src')
+        if "_on.gif" in image_src:
+            is_step_4_on = True
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+    is_next_btn_press = False
+
+    if show_debug_message:
+        print("is_step_4_on:", is_step_4_on)
+
+    is_step_4_submited = False
+    if is_step_4_on:
+        print("interpark_fill_profile")
+
+        iframe_BookStep = None
+        try:
+            iframe_BookStep = driver.find_element(By.CSS_SELECTOR,'#ifrmBookStep')
+            if not iframe_BookStep is None:
+                if iframe_BookStep.is_enabled():
+                    if iframe_BookStep.is_displayed():
+                        try:
+                            driver.switch_to.frame(iframe_BookStep)
+                        except Exception as exc:
+                            pass
+
+                        is_profile_assigned = interpark_fill_confirmation(driver, config_dict)
+                        print("is_profile_assigned:", is_profile_assigned)
+
+                        try:
+                            driver.switch_to.default_content()
+                        except Exception as exc:
+                            pass
+
+                        # press next button.
+                        if is_profile_assigned:
+                            is_step_4_submited = interpart_booking_click_small_next_btn(driver)
+
+        except Exception as exc:
+            if show_debug_message:
+                print(exc)
+            pass
+
+    return is_step_4_submited
+
+def interpark_fill_payment_detail(driver, config_dict):
+    is_payment_assigned = False
+    
+    is_radio_selected = False
+    if not config_dict["foreign_card"]:
+        # korea local credit card.
+        # TODO: in future...
+        is_radio_selected = True
+        pass
+
+    else:
+        el_radio = None
+        try:
+            el_radio = driver.find_element(By.CSS_SELECTOR, "input[type='radio'][value='G1']")
+            if not el_radio is None:
+                if not el_radio.is_selected():
+                    el_radio.click()
+                if el_radio.is_selected():
+                    is_radio_selected = True
+        except Exception as exc:
+            pass
+
+    if is_radio_selected:
+        is_CreditCard_selected = assign_select_by_text(driver, By.CSS_SELECTOR, '#DiscountCardGlobal', config_dict["credit_card_type"])
+        
+        if is_CreditCard_selected:
+            is_payment_assigned = True
+            real_card_number = decryptMe(config_dict["cc_number"])
+            if len(real_card_number)>=16:
+                is_CardNo1_sent = assign_text(driver, By.CSS_SELECTOR, '#CardNo1', real_card_number[:4])
+                is_CardNo2_sent = assign_text(driver, By.CSS_SELECTOR, '#CardNo2', real_card_number[4:8])
+                is_CardNo3_sent = assign_text(driver, By.CSS_SELECTOR, '#CardNo3', real_card_number[8:12])
+                is_CardNo4_sent = assign_text(driver, By.CSS_SELECTOR, '#CardNo4', real_card_number[12:16])
+
+                is_ValidMonth_sent = assign_select_by_text(driver, By.CSS_SELECTOR, '#ValidMonth', config_dict["cc_exp_month"])
+                is_ValidYear_sent = assign_select_by_text(driver, By.CSS_SELECTOR, '#ValidYear', config_dict["cc_exp_year"])
+
+                if not is_CardNo1_sent:
+                    is_payment_assigned = False
+                if not is_CardNo2_sent:
+                    is_payment_assigned = False
+                if not is_CardNo3_sent:
+                    is_payment_assigned = False
+                if not is_CardNo4_sent:
+                    is_payment_assigned = False
+                if not is_ValidMonth_sent:
+                    is_payment_assigned = False
+                if not is_ValidMonth_sent:
+                    is_payment_assigned = False
+
+    return is_payment_assigned
+
+def interpark_fill_payment(driver, config_dict):
+    show_debug_message = True       # debug.
+    #show_debug_message = False      # online
+
+    try:
+        driver.switch_to.default_content()
+    except Exception as exc:
+        pass
+
+    is_step_5_on = False
+    image_element = None
+    try:
+        my_css_selector = "div.step > ul > li.s5 > a > img"
+        image_element = driver.find_element(By.CSS_SELECTOR, my_css_selector)
+        image_src = image_element.get_attribute('src')
+        if "_on.gif" in image_src:
+            is_step_5_on = True
+    except Exception as exc:
+        if show_debug_message:
+            print(exc)
+        pass
+
+    is_next_btn_press = False
+
+    if show_debug_message:
+        print("is_step_5_on:", is_step_5_on)
+
+    is_step_5_submited = False
+    if is_step_5_on:
+        print("interpark_fill_profile")
+
+        iframe_BookStep = None
+        try:
+            iframe_BookStep = driver.find_element(By.CSS_SELECTOR,'#ifrmBookStep')
+            if not iframe_BookStep is None:
+                if iframe_BookStep.is_enabled():
+                    if iframe_BookStep.is_displayed():
+                        try:
+                            driver.switch_to.frame(iframe_BookStep)
+                        except Exception as exc:
+                            pass
+
+                        is_payment_assigned = interpark_fill_payment_detail(driver, config_dict)
+                        print("is_profile_assigned:", is_payment_assigned)
+
+                        is_checkbox_checked = check_checkbox(driver, By.CSS_SELECTOR, '#CancelAgree')
+                        is_checkbox_checked = check_checkbox(driver, By.CSS_SELECTOR, '#CancelAgree2')
+
+                        try:
+                            driver.switch_to.default_content()
+                        except Exception as exc:
+                            pass
+
+                        # press next button.
+                        if is_payment_assigned:
+                            is_step_5_submited = interpart_booking_click_small_next_btn(driver)
+
+        except Exception as exc:
+            if show_debug_message:
+                print(exc)
+            pass
+
+    return is_step_5_submited
 
 def interpart_booking(driver, config_dict, ocr, is_step_1_submited):
     if not is_step_1_submited:
@@ -1812,7 +2058,9 @@ def interpart_booking(driver, config_dict, ocr, is_step_1_submited):
 
         is_step_3_submited = interpart_price_discount(driver, config_dict)
 
-        interpark_fill_profile(driver, config_dict)
+        is_step_4_submited = interpark_fill_profile(driver, config_dict)
+
+        is_step_5_submited = interpark_fill_payment(driver, config_dict)
 
     return is_step_1_submited
 
