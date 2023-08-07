@@ -9,6 +9,10 @@ Max Interpark Bot 2023-08-01 自動驗證碼
 
 https://youtu.be/2bFhGDBXIBE
 
+Max Interpark Bot 2023-08-05 自動填表單與勾選
+
+https://youtu.be/vE6BgPTSzBI
+
 
 # Feature (主要功能)
 * 自動登入 interpark 或 facebook 帳號。
