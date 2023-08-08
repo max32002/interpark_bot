@@ -23,7 +23,7 @@ import subprocess
 import json
 import datetime
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.06)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.07)"
 
 CONST_MAXBOT_CONFIG_FILE = "settings.json"
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -561,6 +561,8 @@ def btn_save_act(language_code, slience_mode=False):
     global txt_time_keyword
     global txt_keyword_exclude
 
+    global tabControl
+
 
     is_all_data_correct = True
 
@@ -593,13 +595,17 @@ def btn_save_act(language_code, slience_mode=False):
     if is_all_data_correct:
         if txt_user_name.get().strip()=="":
             is_all_data_correct = False
-            messagebox.showerror("Error", "Please enter user password or credit card name")
+            tabControl.select(1)
+            txt_user_name.focus_set()
+            messagebox.showerror("Error", "Please enter user name")
         else:
             config_dict["user_name"] = txt_user_name.get().strip()
 
     if is_all_data_correct:
         if txt_user_phone_number.get().strip()=="":
             is_all_data_correct = False
+            tabControl.select(1)
+            txt_user_phone_number.focus_set()
             messagebox.showerror("Error", "Please enter user phone number")
         else:
             config_dict["user_phone_number"] = txt_user_phone_number.get().strip()
@@ -1688,10 +1694,10 @@ def main():
     load_GUI(root, config_dict)
 
     GUI_SIZE_WIDTH = 500
-    GUI_SIZE_HEIGHT = 530
+    GUI_SIZE_HEIGHT = 520
 
     GUI_SIZE_MACOS = str(GUI_SIZE_WIDTH) + 'x' + str(GUI_SIZE_HEIGHT)
-    GUI_SIZE_WINDOWS=str(GUI_SIZE_WIDTH-60) + 'x' + str(GUI_SIZE_HEIGHT-60)
+    GUI_SIZE_WINDOWS=str(GUI_SIZE_WIDTH-60) + 'x' + str(GUI_SIZE_HEIGHT-70)
 
     GUI_SIZE =GUI_SIZE_MACOS
 
