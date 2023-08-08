@@ -50,7 +50,7 @@ except Exception as exc:
 import argparse
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.05)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.06)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -230,6 +230,8 @@ def load_chromdriver_normal(config_dict, driver_type):
     if not os.path.exists(chromedriver_path):
         print("WebDriver not exist, try to download to:", webdriver_path)
         chromedriver_autoinstaller.install(path=webdriver_path, make_version_dir=False)
+    else:
+        print("ChromeDriver exist:", chromedriver_path)
 
     if not os.path.exists(chromedriver_path):
         print("Please download chromedriver and extract zip to webdriver folder from this url:")
@@ -253,20 +255,25 @@ def load_chromdriver_normal(config_dict, driver_type):
                 print(CONST_CHROME_VERSION_NOT_MATCH_EN)
                 print(CONST_CHROME_VERSION_NOT_MATCH_TW)
 
-                # remove exist download again.
+                # remove exist chromedriver, download again.
                 try:
+                    print("Deleting exist and download ChromeDriver again.")
                     os.unlink(chromedriver_path)
-                except PermissionError:
+                except Exception as exc2:
+                    print(exc2)
                     pass
-                except FileNotFoundError:
-                    pass
-                chromedriver_autoinstaller.install(path="webdriver", make_version_dir=False)
+
+                chromedriver_autoinstaller.install(path=webdriver_path, make_version_dir=False)
                 chrome_service = Service(chromedriver_path)
                 try:
                     driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
                 except Exception as exc2:
-                    pass
-
+                    print("Selenium 4.11.0 Release with Chrome For Testing Browser.")
+                    try:
+                        driver = webdriver.Chrome(service=Service(), options=chrome_options)
+                    except Exception as exc3:
+                        print(exc3)
+                        pass
 
     if driver_type=="stealth":
         from selenium_stealth import stealth
