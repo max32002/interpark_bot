@@ -23,7 +23,7 @@ import subprocess
 import json
 import datetime
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.08)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.09)"
 
 CONST_MAXBOT_CONFIG_FILE = "settings.json"
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -86,6 +86,7 @@ def load_translate():
 
     en_us["ocr_captcha"] = 'OCR captcha'
     en_us["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
+    en_us["ocr_captcha_not_support_arm"] = 'ddddocr only supports Intel CPU'
 
     en_us["verbose"] = 'Verbose mode'
     en_us["running_status"] = 'Running Status'
@@ -156,6 +157,7 @@ def load_translate():
 
     zh_tw["ocr_captcha"] = '猜測驗證碼'
     zh_tw["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
+    zh_tw["ocr_captcha_not_support_arm"] = 'ocr 只支援 Intel CPU'
 
     zh_tw["verbose"] = '輸出詳細除錯訊息'
     zh_tw["running_status"] = '執行狀態'
@@ -227,6 +229,7 @@ def load_translate():
 
     zh_cn["ocr_captcha"] = '猜测验证码'
     zh_cn["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
+    zh_cn["ocr_captcha_not_support_arm"] = 'ddddocr 仅支持 Intel CPU'
 
     zh_cn["verbose"] = '输出详细除错讯息'
     zh_cn["running_status"] = '执行状态'
@@ -297,6 +300,7 @@ def load_translate():
 
     ja_jp["ocr_captcha"] = 'キャプチャを推測する'
     ja_jp["ocr_captcha_ddddocr_beta"] = 'ddddocr beta'
+    ja_jp["ocr_captcha_not_support_arm"] = 'Intel CPU のみをサポートします'
 
     ja_jp["verbose"] = '詳細モード'
     ja_jp["running_status"] = 'スターテス'
@@ -819,6 +823,7 @@ def applyNewLanguage():
 
     global lbl_ocr_captcha
     global lbl_ocr_captcha_ddddocr_beta
+    global lbl_ocr_captcha_not_support_arm
 
     global chk_ocr_captcha
     global chk_ocr_captcha_ddddocr_beta
@@ -863,6 +868,7 @@ def applyNewLanguage():
 
     lbl_ocr_captcha.config(text=translate[language_code]["ocr_captcha"])
     lbl_ocr_captcha_ddddocr_beta.config(text=translate[language_code]["ocr_captcha_ddddocr_beta"])
+    lbl_ocr_captcha_not_support_arm.config(text=translate[language_code]["ocr_captcha_not_support_arm"])
 
     chk_ocr_captcha.config(text=translate[language_code]["enable"])
     chk_ocr_captcha_ddddocr_beta.config(text=translate[language_code]["enable"])
@@ -1441,14 +1447,22 @@ def AdvancedTab(root, config_dict, language_code, UI_PADDING_X):
     lbl_ocr_captcha = Label(frame_group_header, text=translate[language_code]['ocr_captcha'])
     lbl_ocr_captcha.grid(column=0, row=group_row_count, sticky = E)
 
+    frame_group_ddddocr_enable = Frame(frame_group_header)
+
     global chk_state_ocr_captcha
     chk_state_ocr_captcha = BooleanVar()
     chk_state_ocr_captcha.set(config_dict['ocr_captcha']["enable"])
 
     global chk_ocr_captcha
-    chk_ocr_captcha = Checkbutton(frame_group_header, text=translate[language_code]['enable'], variable=chk_state_ocr_captcha)
-    chk_ocr_captcha.grid(column=1, row=group_row_count, sticky = W)
+    chk_ocr_captcha = Checkbutton(frame_group_ddddocr_enable, text=translate[language_code]['enable'], variable=chk_state_ocr_captcha)
+    chk_ocr_captcha.grid(column=0, row=0, sticky = W)
 
+    global lbl_ocr_captcha_not_support_arm
+    lbl_ocr_captcha_not_support_arm = Label(frame_group_ddddocr_enable, fg="red", text=translate[language_code]['ocr_captcha_not_support_arm'])
+    if is_arm():
+        lbl_ocr_captcha_not_support_arm.grid(column=1, row=0, sticky = E)
+
+    frame_group_ddddocr_enable.grid(column=1, row=group_row_count, sticky = W)
     group_row_count +=1
 
     global lbl_ocr_captcha_ddddocr_beta

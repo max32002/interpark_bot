@@ -50,7 +50,7 @@ except Exception as exc:
 import argparse
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.08)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.09)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
