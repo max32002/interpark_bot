@@ -50,7 +50,7 @@ except Exception as exc:
 import argparse
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.09)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.10)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -143,7 +143,6 @@ def get_favoriate_extension_path(webdriver_path):
     extension_list.append(os.path.join(webdriver_path,"Buster_2.0.1.0.crx"))
     extension_list.append(os.path.join(webdriver_path,"no_google_analytics_1.1.0.0.crx"))
     extension_list.append(os.path.join(webdriver_path,"proxy-switchyomega_2.5.21.0.crx"))
-    extension_list.append(os.path.join(webdriver_path,"tampermonkey_4.19.0.0.crx"))
     return extension_list
 
 def get_chromedriver_path(webdriver_path):

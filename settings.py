@@ -23,7 +23,7 @@ import subprocess
 import json
 import datetime
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.09)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.10)"
 
 CONST_MAXBOT_CONFIG_FILE = "settings.json"
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -566,7 +566,6 @@ def btn_save_act(language_code, slience_mode=False):
     global txt_keyword_exclude
 
     global tabControl
-
 
     is_all_data_correct = True
 
