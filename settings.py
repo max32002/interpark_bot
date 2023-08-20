@@ -1590,7 +1590,7 @@ def AboutTab(root, language_code):
     lbl_help = Label(frame_group_header, text=translate[language_code]['help'])
     lbl_help.grid(column=0, row=group_row_count, sticky = E)
 
-    lbl_help_url = Label(frame_group_header, text=URL_HELP, fg="blue", cursor="hand2")
+    lbl_help_url = Label(frame_group_header, text=URL_HELP, fg="blue", bg="gray", cursor="hand2")
     lbl_help_url.grid(column=1, row=group_row_count, sticky = W)
     lbl_help_url.bind("<Button-1>", lambda e: open_url(URL_HELP))
 
@@ -1599,7 +1599,7 @@ def AboutTab(root, language_code):
     lbl_donate = Label(frame_group_header, text=translate[language_code]['donate'])
     lbl_donate.grid(column=0, row=group_row_count, sticky = E)
 
-    lbl_donate_url = Label(frame_group_header, text=URL_DONATE, fg="blue", cursor="hand2")
+    lbl_donate_url = Label(frame_group_header, text=URL_DONATE, fg="blue", bg="gray", cursor="hand2")
     lbl_donate_url.grid(column=1, row=group_row_count, sticky = W)
     lbl_donate_url.bind("<Button-1>", lambda e: open_url(URL_DONATE))
 
@@ -1608,7 +1608,7 @@ def AboutTab(root, language_code):
     lbl_release = Label(frame_group_header, text=translate[language_code]['release'])
     lbl_release.grid(column=0, row=group_row_count, sticky = E)
 
-    lbl_release_url = Label(frame_group_header, text=URL_RELEASE, fg="blue", cursor="hand2")
+    lbl_release_url = Label(frame_group_header, text=URL_RELEASE, fg="blue", bg="gray", cursor="hand2")
     lbl_release_url.grid(column=1, row=group_row_count, sticky = W)
     lbl_release_url.bind("<Button-1>", lambda e: open_url(URL_RELEASE))
 
@@ -1617,7 +1617,7 @@ def AboutTab(root, language_code):
     lbl_fb_fans = Label(frame_group_header, text=u'Facebook')
     lbl_fb_fans.grid(column=0, row=group_row_count, sticky = E)
 
-    lbl_fb_fans_url = Label(frame_group_header, text=URL_FB, fg="blue", cursor="hand2")
+    lbl_fb_fans_url = Label(frame_group_header, text=URL_FB, fg="blue", bg="gray", cursor="hand2")
     lbl_fb_fans_url.grid(column=1, row=group_row_count, sticky = W)
     lbl_fb_fans_url.bind("<Button-1>", lambda e: open_url(URL_FB))
 
