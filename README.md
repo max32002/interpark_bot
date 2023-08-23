@@ -1,6 +1,8 @@
 # Max interpark 搶票機器人
 help you quickly fill your order form online.
 
+好多人想去看韓國追星，或是去看《英雄聯盟》世界賽，我寫了一個自動填表單的小程式，能幫你搶票更順利。
+
 如果是在公用的電腦，建議不要填入自己所有的信用卡資料，以避免個人的資料遭其他共用電腦的使用者被盜用。
 
 # Demo (示範影片)
@@ -49,6 +51,8 @@ https://stackoverflow.max-everyday.com/2018/03/selenium-chrome-webdriver/
 
 # Execute suggestion (填表單建議)
 限量的訂位系統的是殘酷的，建議不要用破舊的電腦或連線不穩的手機網路來搶，因為只要比別人慢個 0.1 秒，名額可能就沒了。為了要搶到限量的名額真心建議去網咖或找一個網路連線穩定且快的地方並使用硬體不差的電腦來搶位子。
+
+如果你在使用上有遇到問題，建議先看看下面這篇文章裡的問題排除，因為 MaxBot 和 Max Interpark Bot 用的程式幾乎一樣: https://max-everyday.com/2018/03/tixcraft-bot/
 
 # Donate (贊助Max)
 如果你覺得這篇文章或MaxBot寫的很好，想打賞Max，贊助方式如下： https://max-everyday.com/about/#donate
