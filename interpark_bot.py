@@ -9,6 +9,7 @@ import platform
 import json
 import random
 
+from selenium import webdriver
 # for close tab.
 from selenium.common.exceptions import NoSuchWindowException
 from selenium.common.exceptions import UnexpectedAlertPresentException
@@ -50,7 +51,7 @@ except Exception as exc:
 import argparse
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.10)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.11)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
