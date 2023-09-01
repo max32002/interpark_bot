@@ -51,7 +51,7 @@ except Exception as exc:
 import argparse
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.08.11)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.08.31)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -193,6 +193,9 @@ def get_chrome_options(webdriver_path, adblock_plus_enable, browser="chrome", he
     chrome_options.add_argument('--lang=zh-TW')
     chrome_options.add_argument('--disable-web-security')
     chrome_options.add_argument("--no-sandbox");
+    chrome_options.add_argument("--disable-popup-blocking")
+    chrome_options.add_argument("--disable-notifications")
+
 
     # for navigator.webdriver
     chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
@@ -376,6 +379,10 @@ def load_chromdriver_uc(config_dict):
     options.add_argument('--lang=zh-TW')
     options.add_argument('--disable-web-security')
     options.add_argument("--no-sandbox");
+    options.add_argument("--disable-popup-blocking")
+    options.add_argument("--disable-notifications")
+
+
 
     options.add_argument("--password-store=basic")
     options.add_experimental_option("prefs", {"credentials_enable_service": False, "profile.password_manager_enabled": False, "translate":{"enabled": False}})
@@ -900,7 +907,7 @@ def facebook_login(driver, account, password):
 
 def interpark_get_local_code(locale_title):
     code = "en"
-    if locale_title == "locale":
+    if locale_title == "한국어":
         code = "ko"
     if locale_title == "中文":
         code = "zh-cn"
@@ -908,21 +915,25 @@ def interpark_get_local_code(locale_title):
         code = "ja"
     return code
 
-def interpark_change_locale(driver, config_dict):
+def interpark_change_locale(driver, config_dict, url):
     el_locale = None
     try:
-        el_locale = driver.find_element(By.CSS_SELECTOR, '#lang_title')
+        el_locale = driver.find_element(By.CSS_SELECTOR, 'body > main > nav > div > ul > li:nth-child(4) > div > div')
         current_locale = el_locale.text
         if len(current_locale) > 0:
             if config_dict["locale"] != current_locale:
                 local_code = interpark_get_local_code(config_dict["locale"])
-                js = "fnc_changeLocale('%s');" % (local_code)
-                driver.set_script_timeout(1)
-                driver.execute_script(js)
-                time.sleep(0.2)
+                new_url = "https://www.globalinterpark.com/login?lang=" + local_code
+                if new_url != url:
+                    driver.get(new_url)
     except Exception as exc:
         print(exc)
         pass
+
+    interpark_account = config_dict["advanced"]["interpark_account"]
+    if len(interpark_account) > 2:
+        interpark_login(driver, interpark_account, decryptMe(config_dict["advanced"]["interpark_password"]))
+
 
 def search_iframe(driver, f, by, value):
     elem = None
@@ -1341,10 +1352,10 @@ def interpart_time_auto_select(driver, config_dict):
     return is_time_assign_by_bot, is_select_exist
 
 def interpark_login(driver, account, password):
-    is_email_sent = assign_text(driver, By.CSS_SELECTOR, '#memEmail', account)
+    is_email_sent = assign_text(driver, By.CSS_SELECTOR, 'input[type="text"][autocomplete="email"]', account)
     is_password_sent = False
     if is_email_sent:
-        is_password_sent = assign_text(driver, By.CSS_SELECTOR, '#memPass', password, submit=True)
+        is_password_sent = assign_text(driver, By.CSS_SELECTOR, 'input[type="password"]', password, submit=True)
     return is_password_sent
 
 def escape_to_first_tab(driver, main_window_handle):
@@ -2074,18 +2085,21 @@ def interpart_booking(driver, config_dict, ocr, is_step_1_submited):
 def interpark_main(driver, config_dict, url, ocr, interpark_dict):
     escape_to_first_tab(driver, interpark_dict["main_window_handle"])
 
-    if "globalinterpark.com/user/signin" in url:
-        interpark_account = config_dict["advanced"]["interpark_account"]
-        if len(interpark_account) > 2:
-            interpark_login(driver, interpark_account, decryptMe(config_dict["advanced"]["interpark_password"]))
+    if "globalinterpark.com/login?lang=" in url:
+        interpark_change_locale(driver, config_dict, url)
 
-    if "globalinterpark.com/main/main" in url:
-        interpark_change_locale(driver, config_dict)
-
-    if "globalinterpark.com/detail/edetail?prdNo=" in url:
-        if not interpark_dict["opener_popuped"]:
-            interpark_dict["opener_popuped"] = interpark_event_detail(driver, config_dict, url)
-    else:
+    # https://www.globalinterpark.com/product/23010160?lang=en
+    reset_opener_popup_flag = True
+    if "globalinterpark.com/product/" in url:
+        is_event_page = False
+        if len(url.split('/'))==5:
+            is_event_page = True
+        if is_event_page:
+            if not interpark_dict["opener_popuped"]:
+                reset_opener_popup_flag = False
+                interpark_dict["opener_popuped"] = interpark_event_detail(driver, config_dict, url)
+    
+    if reset_opener_popup_flag:
         interpark_dict["opener_popuped"] = False
 
     if "/Global/Play/Book/BookMain.asp" in url:
