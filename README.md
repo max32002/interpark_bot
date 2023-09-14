@@ -5,7 +5,7 @@ help you quickly fill your order form online.
 
 如果是在公用的電腦，建議不要填入自己所有的信用卡資料，以避免個人的資料遭其他共用電腦的使用者被盜用。
 
-目前搶票機器人已無法使, 等後其他大神解決 CloudFlare 的機器人檢測，如果想了解進度，可以在下面的專案去看看:
+目前搶票機器人已無法使用, 等待其他大神解決 CloudFlare 的機器人檢測，如果想了解進度，可以在下面的專案去看看:
 
 https://github.com/ultrafunkamsterdam/undetected-chromedriver
 
