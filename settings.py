@@ -1,29 +1,28 @@
 #!/usr/bin/env python
 #encoding=utf-8
-# 'seleniumwire' and 'selenium 4' raise error when running python 2.x
-# PS: python 2.x will be removed in future.
 try:
     # for Python2
-    from Tkinter import *
-    import ttk
     import tkMessageBox as messagebox
+    import ttk
+    from Tkinter import *
 except ImportError:
     # for Python3
     from tkinter import *
     from tkinter import ttk
     from tkinter import messagebox
-import os
-import sys
-import platform
-import webbrowser
-import base64
-import time
-import threading
-import subprocess
-import json
-import datetime
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.09.01)"
+import base64
+import datetime
+import json
+import os
+import platform
+import subprocess
+import sys
+import threading
+import time
+import webbrowser
+
+CONST_APP_VERSION = "Max Interpark Bot (2023.09.02)"
 
 CONST_MAXBOT_CONFIG_FILE = "settings.json"
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
