@@ -1,57 +1,52 @@
 #!/usr/bin/env python3
 #encoding=utf-8
-# seleniumwire not support python 2.x.
-# if you want running under python 2.x, you need to assign driver_type = 'stealth'
+import json
+import logging
 import os
 import pathlib
-import sys
 import platform
-import json
 import random
+import sys
+import time
 
 from selenium import webdriver
-# for close tab.
-from selenium.common.exceptions import NoSuchWindowException
-from selenium.common.exceptions import UnexpectedAlertPresentException
-from selenium.common.exceptions import NoAlertPresentException
-from selenium.common.exceptions import WebDriverException
-# for alert 2
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-# for selenium 4
+from selenium.common.exceptions import (NoAlertPresentException,
+                                        NoSuchWindowException,
+                                        UnexpectedAlertPresentException,
+                                        WebDriverException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
-# for wait #1
-import time
-# for error output
-import logging
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
 logging.basicConfig()
 logger = logging.getLogger('logger')
-# for check reg_info
-import requests
 import warnings
+
 from urllib3.exceptions import InsecureRequestWarning
+
 warnings.simplefilter('ignore',InsecureRequestWarning)
 
 import ssl
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 # ocr
 import base64
+
 try:
     import ddddocr
-    #PS: python 3.11.1 raise PIL conflict.
     from NonBrowser import NonBrowser
 except Exception as exc:
     pass
 
 import argparse
+
 import chromedriver_autoinstaller
 
-CONST_APP_VERSION = "Max Interpark Bot (2023.09.01)"
+CONST_APP_VERSION = "Max Interpark Bot (2023.09.02)"
 
 CONST_MAXBOT_CONFIG_FILE = 'settings.json'
 CONST_MAXBOT_LAST_URL_FILE = "MAXBOT_LAST_URL.txt"
@@ -280,6 +275,7 @@ def load_chromdriver_normal(config_dict, driver_type):
 
     if driver_type=="stealth":
         from selenium_stealth import stealth
+
         # Selenium Stealth settings
         stealth(driver,
               languages=["zh-TW", "zh"],
