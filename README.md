@@ -5,7 +5,7 @@ help you quickly fill your order form online.
 
 如果是在公用的電腦，建議不要填入自己所有的信用卡資料，以避免個人的資料遭其他共用電腦的使用者被盜用。
 
-目前搶票機器人因為 CloudFlare 已無法使用, 需要找時間把腳本從 selenium 改寫為 DrissionPage 格式, 如果想了解進度，可以在下面的專案去看看:
+目前搶票機器人因為 CloudFlare 已無法使用, 需要找時間把腳本從 selenium 改寫為 DrissionPage 格式, 如果想了解DrissionPage是什麼，可以在下面的專案去看看:
 
 https://github.com/g1879/DrissionPage/
 
